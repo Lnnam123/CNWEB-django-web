@@ -1,0 +1,155 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Quản Lý Danh Mục - CoinTap{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Danh Mục Thu - Chi</h1>
+    <p style="color: var(--text-muted); font-size: 0.925rem;">Phân loại và gán nhãn cho các khoản tiền của bạn</p>
+  </div>
+  <button onclick="openModal('createCategoryModal')" class="btn btn-primary">
+    <span class="material-symbols-outlined">add</span>
+    <span>Thêm danh mục mới</span>
+  </button>
+</div>
+
+<!-- 1. Danh mục cá nhân tùy chỉnh của người dùng -->
+<div class="card" style="margin-bottom: 2rem;">
+  <div class="card-header">
+    <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <span class="material-symbols-outlined" style="color: var(--brand-primary);">person</span>
+      Danh Mục Cá Nhân Tùy Chỉnh
+    </h2>
+    <span class="badge badge-indigo">{{ user_categories|length }} danh mục</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
+    {% for c in user_categories %}
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); border-left: 4px solid {{ c.color }};">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: {{ c.color }}15; color: {{ c.color }}; display: flex; align-items: center; justify-content: center;">
+          <span class="material-symbols-outlined" style="font-size: 1.25rem;">{{ c.icon }}</span>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.925rem;">{{ c.name }}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">
+            {% if c.type == 'INCOME' %}Khoản thu [+]{% else %}Khoản chi [-]{% endif %}
+          </div>
+        </div>
+      </div>
+      <a href="{% url 'category_delete' c.category_id %}" class="btn btn-ghost btn-sm btn-icon btn-confirm-delete" data-name="{{ c.name }}" style="color: var(--accent-coral);" title="Xóa">
+        <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete</span>
+      </a>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+      Bạn chưa tạo danh mục cá nhân nào. Bấm <strong>"+ Thêm danh mục mới"</strong> để tự tạo danh mục riêng (ví dụ: Game, Nuôi mèo, Sách...).
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- 2. Danh mục mặc định toàn hệ thống -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <span class="material-symbols-outlined" style="color: #64748b;">public</span>
+      Danh Mục Hệ Thống Chuẩn
+    </h2>
+    <span class="badge badge-neutral">Dùng chung</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem;">
+    {% for c in system_categories %}
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); border-left: 4px solid {{ c.color }}; background-color: #fafafa;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: {{ c.color }}15; color: {{ c.color }}; display: flex; align-items: center; justify-content: center;">
+          <span class="material-symbols-outlined" style="font-size: 1.25rem;">{{ c.icon }}</span>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.925rem;">{{ c.name }}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">
+            {% if c.type == 'INCOME' %}Khoản thu [+]{% else %}Khoản chi [-]{% endif %}
+          </div>
+        </div>
+      </div>
+      <span class="badge badge-neutral" style="font-size: 0.7rem;">Mặc định</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: TẠO DANH MỤC RIÊNG                                                 -->
+<!-- ========================================================================= -->
+<div id="createCategoryModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="card-title">Thêm Danh Mục Riêng</h3>
+      <button onclick="closeModal('createCategoryModal')" class="btn btn-ghost btn-icon">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form action="{% url 'category_create' %}" method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tên danh mục *</label>
+          <input type="text" name="name" class="form-control" placeholder="Ví dụ: Nuôi thú cưng, Đầu tư, Học ngoại ngữ..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Loại danh mục *</label>
+          <select name="type" class="form-control" required>
+            <option value="EXPENSE">Khoản chi tiêu [-]</option>
+            <option value="INCOME">Khoản thu nhập [+]</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Biểu tượng Icon</label>
+            <select name="icon" class="form-control">
+              <option value="category">Mặc định</option>
+              <option value="restaurant">Ăn uống</option>
+              <option value="shopping_bag">Mua sắm</option>
+              <option value="directions_car">Di chuyển</option>
+              <option value="sports_esports">Game / Giải trí</option>
+              <option value="home">Nhà cửa / Trọ</option>
+              <option value="pets">Thú cưng</option>
+              <option value="fitness_center">Gym / Thể thao</option>
+              <option value="school">Học tập</option>
+              <option value="flight">Du lịch</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Màu sắc</label>
+            <input type="color" name="color" class="form-control" value="#6366F1" style="height: 42px; padding: 2px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('createCategoryModal')" class="btn btn-outline">Hủy</button>
+        <button type="submit" class="btn btn-primary">Tạo danh mục</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.querySelectorAll('.btn-confirm-delete').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const name = link.dataset.name || 'này';
+      if (!confirm(`Bạn có chắc muốn xóa danh mục "${name}"?`)) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}
+

@@ -1,0 +1,244 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Quản Lý Ví Tiền - CoinTap{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Danh Sách Ví Tiền</h1>
+    <p style="color: var(--text-muted); font-size: 0.925rem;">Quản lý các tài khoản nguồn, tiền mặt và ngân hàng của bạn</p>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <button onclick="openModal('quickTransferModal')" class="btn btn-outline">
+      <span class="material-symbols-outlined">swap_horiz</span>
+      <span>Chuyển tiền giữa các ví</span>
+    </button>
+    <button onclick="openModal('createWalletModal')" class="btn btn-primary">
+      <span class="material-symbols-outlined">add</span>
+      <span>Thêm ví mới</span>
+    </button>
+  </div>
+</div>
+
+<!-- Tổng số dư các ví -->
+<div class="card" style="margin-bottom: 1.75rem; background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%); color: #ffffff;">
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div>
+      <div style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">Tổng tài sản trong tất cả các ví đang hoạt động</div>
+      <div class="tabular" style="font-size: 2.25rem; font-weight: 800; margin-top: 0.25rem;">
+        {{ total_balance|vnd }} <span style="font-size: 1.25rem; font-weight: 500;">₫</span>
+      </div>
+    </div>
+    <div style="text-align: right;">
+      <span class="badge badge-mint" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+        {{ wallets|length }} tài khoản nguồn
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Lưới danh sách các ví -->
+<div class="wallet-grid">
+  {% for w in wallets %}
+  <div class="wallet-card" style="--wallet-color: {{ w.color|default:'#10b981' }}; {% if not w.is_active %}opacity: 0.65;{% endif %}">
+    <div class="wallet-card-header">
+      <div class="wallet-icon-box" style="background-color: {{ w.color|default:'#10b981' }};">
+        <span class="material-symbols-outlined" style="font-size: 1.5rem;">{{ w.icon|default:'account_balance_wallet' }}</span>
+      </div>
+      <div>
+        {% if w.is_active %}
+        <span class="badge badge-mint">Đang dùng</span>
+        {% else %}
+        <span class="badge badge-neutral">Đã đóng</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">{{ w.wallet_name }}</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">{{ w.get_wallet_type_display }}</p>
+      
+      <div class="tabular" style="font-size: 1.65rem; font-weight: 800; color: {% if w.balance >= 0 %}var(--text-main){% else %}var(--accent-coral){% endif %}; margin-bottom: 1.25rem;">
+        {{ w.balance|vnd }}₫
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; border-top: 1px solid var(--border-subtle); padding-top: 0.85rem;">
+        <button type="button"
+                class="btn btn-outline btn-sm btn-edit-wallet"
+                data-id="{{ w.wallet_id }}"
+                data-name="{{ w.wallet_name }}"
+                data-type="{{ w.wallet_type }}"
+                data-icon="{{ w.icon }}"
+                data-color="{{ w.color }}"
+                data-active="{{ w.is_active|yesno:'true,false' }}"
+                style="flex: 1;">
+          <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
+          <span>Sửa</span>
+        </button>
+        <a href="{% url 'wallet_delete' w.wallet_id %}" class="btn btn-outline btn-sm btn-confirm-delete-wallet" data-name="{{ w.wallet_name }}" style="color: var(--accent-coral);" title="Xóa ví">
+          <span class="material-symbols-outlined" style="font-size: 1rem;">delete</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: TẠO VÍ TIỀN MỚI                                                    -->
+<!-- ========================================================================= -->
+<div id="createWalletModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="card-title">Thêm Ví Tiền / Tài Khoản Mới</h3>
+      <button onclick="closeModal('createWalletModal')" class="btn btn-ghost btn-icon">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form action="{% url 'wallet_create' %}" method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tên ví *</label>
+          <input type="text" name="wallet_name" class="form-control" placeholder="Ví dụ: Techcombank, Tiền tiêu vặt..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Loại tài khoản *</label>
+          <select name="wallet_type" class="form-control">
+            <option value="CASH">Tiền mặt</option>
+            <option value="BANK">Tài khoản ngân hàng</option>
+            <option value="E_WALLET">Ví điện tử (Momo, ZaloPay...)</option>
+            <option value="SAVINGS">Tiết kiệm / Heo đất</option>
+            <option value="CREDIT">Thẻ tín dụng</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Số dư khởi tạo (VNĐ)</label>
+          <input type="text" name="balance" class="form-control input-currency tabular" value="0" placeholder="0">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Mã Biểu tượng (Icon)</label>
+            <select name="icon" class="form-control">
+              <option value="account_balance_wallet">Ví tiền</option>
+              <option value="credit_card">Thẻ ngân hàng</option>
+              <option value="payments">Tiền giấy</option>
+              <option value="savings">Heo đất</option>
+              <option value="account_balance">Ngân hàng</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Màu sắc đại diện</label>
+            <input type="color" name="color" class="form-control" value="#10B981" style="height: 42px; padding: 2px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('createWalletModal')" class="btn btn-outline">Hủy</button>
+        <button type="submit" class="btn btn-primary">Tạo ví</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: SỬA THÔNG TIN VÍ                                                  -->
+<!-- ========================================================================= -->
+<div id="editWalletModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="card-title">Cập Nhật Ví Tiền</h3>
+      <button onclick="closeModal('editWalletModal')" class="btn btn-ghost btn-icon">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="editWalletForm" method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tên ví *</label>
+          <input type="text" name="wallet_name" id="editWalletName" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Loại tài khoản</label>
+          <select name="wallet_type" id="editWalletType" class="form-control">
+            <option value="CASH">Tiền mặt</option>
+            <option value="BANK">Tài khoản ngân hàng</option>
+            <option value="E_WALLET">Ví điện tử</option>
+            <option value="SAVINGS">Tiết kiệm / Heo đất</option>
+            <option value="CREDIT">Thẻ tín dụng</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Icon</label>
+            <select name="icon" id="editWalletIcon" class="form-control">
+              <option value="account_balance_wallet">Ví tiền</option>
+              <option value="credit_card">Thẻ ngân hàng</option>
+              <option value="payments">Tiền giấy</option>
+              <option value="savings">Heo đất</option>
+              <option value="account_balance">Ngân hàng</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Màu sắc</label>
+            <input type="color" name="color" id="editWalletColor" class="form-control" style="height: 42px; padding: 2px;">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.5rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="is_active" id="editWalletActive">
+            <span style="font-size: 0.9rem; font-weight: 600;">Ví đang hoạt động</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('editWalletModal')" class="btn btn-outline">Hủy</button>
+        <button type="submit" class="btn btn-primary">Cập nhật ví</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function openEditWallet(id, name, type, icon, color, isActive) {
+    const form = document.getElementById('editWalletForm');
+    form.action = `/wallets/${id}/edit/`;
+    document.getElementById('editWalletName').value = name;
+    document.getElementById('editWalletType').value = type;
+    document.getElementById('editWalletIcon').value = icon;
+    document.getElementById('editWalletColor').value = color;
+    document.getElementById('editWalletActive').checked = (isActive === true || isActive === 'true');
+    openModal('editWalletModal');
+  }
+
+  document.querySelectorAll('.btn-edit-wallet').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset;
+      openEditWallet(d.id, d.name, d.type, d.icon, d.color, d.active === 'true');
+    });
+  });
+
+  document.querySelectorAll('.btn-confirm-delete-wallet').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const name = link.dataset.name || 'này';
+      if (!confirm(`Bạn có chắc muốn xóa ví "${name}" không?`)) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}
+

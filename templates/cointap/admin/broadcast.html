@@ -1,0 +1,80 @@
+{% extends 'cointap/base_admin.html' %}
+
+{% block title %}Phát Thông Báo Toàn Sàn - CoinTap Admin{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Phát Thông Báo Toàn Hệ Thống</h1>
+  <p style="color: var(--text-muted); font-size: 0.925rem;">Gửi thông báo đẩy và cảnh báo tài chính tới toàn bộ người dùng ứng dụng</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.75rem;">
+  <!-- Form bắn thông báo -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+        <span class="material-symbols-outlined" style="color: var(--brand-primary);">campaign</span>
+        Soạn Thông Báo Đẩy Mới
+      </h2>
+    </div>
+
+    <form action="{% url 'admin_broadcast' %}" method="POST">
+      {% csrf_token %}
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label class="form-label">Tiêu đề thông báo *</label>
+        <input type="text" name="title" class="form-control" placeholder="Ví dụ: Cập nhật ứng dụng phiên bản 2.0..." required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label class="form-label">Loại thông báo *</label>
+        <select name="type" class="form-control" required>
+          <option value="SYSTEM">Hệ thống (Tin tức, nâng cấp, tính năng mới)</option>
+          <option value="WARNING">Cảnh báo quan trọng</option>
+          <option value="BUDGET_ALERT">Cảnh báo chi tiêu / Ngân sách</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label class="form-label">Nội dung chi tiết thông báo *</label>
+        <textarea name="content" class="form-control" rows="5" placeholder="Nhập nội dung đầy đủ sẽ gửi đến hộp thư thông báo của tất cả người dùng..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">
+        <span class="material-symbols-outlined">send</span>
+        <span>Xác nhận phát thông báo cho toàn bộ người dùng</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Danh sách lịch sử thông báo vừa phát -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Nhật Ký Thông Báo Gần Nhất</h2>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 460px; overflow-y: auto;">
+      {% for b in recent_broadcasts %}
+      <div style="padding: 0.85rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); border-left: 4px solid {% if b.type == 'BUDGET_ALERT' %}var(--accent-coral){% elif b.type == 'WARNING' %}var(--accent-amber){% else %}var(--brand-primary){% endif %};">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+          <strong style="font-size: 0.9rem; color: var(--text-main);">{{ b.title }}</strong>
+          <span class="tabular" style="font-size: 0.75rem; color: var(--text-muted);">{{ b.created_at|date:"d/m H:i" }}</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 0.35rem;">
+          {{ b.content|truncatechars:100 }}
+        </p>
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+          <span>Gửi tới: <strong>{{ b.user.full_name }}</strong></span>
+          <span class="badge badge-neutral" style="font-size: 0.65rem;">{{ b.type }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+        Chưa có thông báo nào được phát.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

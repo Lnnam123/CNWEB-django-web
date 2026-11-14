@@ -1,0 +1,364 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Tổng Quan Tài Chính - CoinTap{% endblock %}
+
+{% block content %}
+<!-- ========================================================================= -->
+<!-- 1. HERO SECTION: FINANCIAL PULSE KPI CARDS                                -->
+<!-- ========================================================================= -->
+<section class="financial-pulse-grid">
+  <!-- Thẻ 1: Tổng tài sản khả dụng -->
+  <div class="card pulse-card-hero">
+    <div class="pulse-label">Tổng tài sản khả dụng</div>
+    <div class="pulse-val tabular">{{ total_balance|vnd }} <span style="font-size: 1.25rem; font-weight: 500;">₫</span></div>
+    <div class="pulse-sub">
+      <span class="badge badge-mint" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">
+        <span class="material-symbols-outlined" style="font-size: 0.9rem;">account_balance_wallet</span>
+        {{ wallets|length }} ví đang hoạt động
+      </span>
+    </div>
+  </div>
+
+  <!-- Thẻ 2: Tổng thu nhập tháng -->
+  <div class="card">
+    <div class="pulse-label" style="display: flex; justify-content: space-between; align-items: center;">
+      <span>Thu nhập tháng này</span>
+      <span class="material-symbols-outlined" style="color: var(--accent-mint); font-size: 1.2rem;">arrow_downward</span>
+    </div>
+    <div class="pulse-val tabular" style="color: var(--accent-mint);">+{{ month_income|vnd }} <span style="font-size: 1.1rem; color: var(--text-muted);">₫</span></div>
+    <div class="pulse-sub">
+      <span class="badge badge-mint">Dòng tiền vào</span>
+    </div>
+  </div>
+
+  <!-- Thẻ 3: Tổng chi tiêu tháng -->
+  <div class="card">
+    <div class="pulse-label" style="display: flex; justify-content: space-between; align-items: center;">
+      <span>Chi tiêu tháng này</span>
+      <span class="material-symbols-outlined" style="color: var(--accent-coral); font-size: 1.2rem;">arrow_upward</span>
+    </div>
+    <div class="pulse-val tabular" style="color: var(--accent-coral);">-{{ month_expense|vnd }} <span style="font-size: 1.1rem; color: var(--text-muted);">₫</span></div>
+    <div class="pulse-sub">
+      {% if expense_diff_pct > 0 %}
+      <span class="badge badge-coral">Tăng {{ expense_diff_pct|floatformat:1 }}% so với tháng trước</span>
+      {% else %}
+      <span class="badge badge-mint">Kiểm soát tốt</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Thẻ 4: Thặng dư tích lũy -->
+  <div class="card">
+    <div class="pulse-label" style="display: flex; justify-content: space-between; align-items: center;">
+      <span>Thặng dư / Tích lũy</span>
+      <span class="material-symbols-outlined" style="color: var(--brand-primary); font-size: 1.2rem;">savings</span>
+    </div>
+    <div class="pulse-val tabular" style="color: {% if net_savings >= 0 %}var(--brand-primary){% else %}var(--accent-coral){% endif %};">
+      {% if net_savings >= 0 %}+{% endif %}{{ net_savings|vnd }} <span style="font-size: 1.1rem; color: var(--text-muted);">₫</span>
+    </div>
+    <div class="pulse-sub">
+      <span class="badge badge-indigo">Tỷ lệ tích lũy: {{ savings_rate|floatformat:0 }}%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================================= -->
+<!-- 2. BIỂU ĐỒ VÀ BẢNG THU CHI TRỌNG TÂM                                      -->
+<!-- ========================================================================= -->
+<div class="dashboard-two-col-grid" style="margin-bottom: 2rem;">
+  <!-- Cột trái: Biểu đồ dòng tiền 7 ngày -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Dòng Tiền 7 Ngày Gần Nhất</h2>
+        <p style="font-size: 0.825rem; color: var(--text-muted);">So sánh đối soát giữa các khoản thu vào và chi ra</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <span class="badge badge-mint">Thu nhập</span>
+        <span class="badge badge-coral">Chi tiêu</span>
+      </div>
+    </div>
+
+    <div style="height: 280px; position: relative;">
+      <canvas id="cashflowChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Cột phải: Tỷ trọng Chi tiêu (Donut Chart) -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Cơ Cấu Chi Tiêu Tháng</h2>
+        <p style="font-size: 0.825rem; color: var(--text-muted);">Phân bổ chi phí theo từng danh mục</p>
+      </div>
+    </div>
+
+    <div style="height: 280px; position: relative; display: flex; align-items: center; justify-content: center;">
+      {% if donut_data_json != "[]" %}
+      <canvas id="categoryDonutChart"></canvas>
+      {% else %}
+      <div style="text-align: center; color: var(--text-muted);">
+        <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #cbd5e1;">pie_chart</span>
+        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Chưa có khoản chi nào trong tháng</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 3. GIAO DỊCH GẦN ĐÂY VÀ SỨC KHỎE NGÂN SÁCH                                 -->
+<!-- ========================================================================= -->
+<div class="dashboard-two-col-grid">
+  <!-- Bảng Giao dịch gần đây -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Giao Dịch Gần Nhất</h2>
+        <p style="font-size: 0.825rem; color: var(--text-muted);">Các biến động số dư vừa phát sinh</p>
+      </div>
+      <a href="{% url 'transactions_list' %}" class="btn btn-outline btn-sm">Xem tất cả</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Danh mục</th>
+            <th>Ghi chú</th>
+            <th>Ví nguồn</th>
+            <th style="text-align: right;">Số tiền</th>
+            <th style="text-align: center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in recent_transactions %}
+          <tr>
+            <td style="color: var(--text-muted); font-size: 0.825rem;">
+              {{ t.transaction_date|date:"d/m H:i" }}
+            </td>
+            <td>
+              <span class="badge" style="background-color: {{ t.category.color|default:'#6366F1' }}15; color: {{ t.category.color|default:'#6366F1' }};">
+                <span class="material-symbols-outlined" style="font-size: 0.95rem;">{{ t.category.icon|default:'sell' }}</span>
+                {{ t.category.name|default:'Khác' }}
+              </span>
+            </td>
+            <td style="font-weight: 500;">
+              {{ t.note|default:"—" }}
+            </td>
+            <td>
+              <span style="font-size: 0.825rem; color: var(--text-secondary);">
+                {{ t.wallet.wallet_name }}
+              </span>
+            </td>
+            <td style="text-align: right;" class="tabular">
+              {% if t.type == 'INCOME' %}
+              <span style="color: var(--accent-mint); font-weight: 700;">+{{ t.amount|vnd }}₫</span>
+              {% else %}
+              <span style="color: var(--accent-coral); font-weight: 700;">-{{ t.amount|vnd }}₫</span>
+              {% endif %}
+            </td>
+            <td style="text-align: center;">
+              <a href="{% url 'transaction_delete' t.transaction_id %}" class="btn-confirm-delete-tx" title="Xóa" style="color: #94a3b8; text-decoration: none;">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete</span>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+              Chưa có giao dịch nào được ghi nhận. Nhấn <strong>"+ Thêm giao dịch"</strong> để bắt đầu!
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cột phải: Trạng thái Ngân sách & Ví tiền -->
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- Sức khỏe Ngân sách -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Cảnh Báo Hạn Mức Ngân Sách</h2>
+        <a href="{% url 'budgets_list' %}" class="btn btn-outline btn-sm">Quản lý</a>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        {% for b in budget_cards %}
+        <div class="budget-meter">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+              <span class="material-symbols-outlined" style="font-size: 1.1rem; color: {{ b.category.color }};">{{ b.category.icon }}</span>
+              <span>{{ b.category.name }}</span>
+            </div>
+            <span class="badge badge-{{ b.status_color }}">{{ b.status_text }}</span>
+          </div>
+
+          <div class="meter-track">
+            <div class="meter-fill {{ b.status_color }}" style="width: {{ b.percentage }}%;"></div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);" class="tabular">
+            <span>Đã chi: <strong>{{ b.spent|vnd }}₫</strong></span>
+            <span>Hạn mức: {{ b.limit|vnd }}₫ ({{ b.raw_percentage|floatformat:0 }}%)</span>
+          </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.85rem;">
+          Bạn chưa đặt hạn mức ngân sách nào cho tháng này.
+          <div style="margin-top: 0.5rem;">
+            <a href="{% url 'budgets_list' %}" class="btn btn-outline btn-sm">+ Tạo ngân sách</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Danh sách ví tiền nhanh -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Ví Tiền Khả Dụng</h2>
+        <button onclick="openModal('quickTransferModal')" class="btn btn-outline btn-sm">Chuyển tiền</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        {% for w in wallets %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.85rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); border-left: 4px solid {{ w.color|default:'#10B981' }};">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span class="material-symbols-outlined" style="color: {{ w.color|default:'#10B981' }}; font-size: 1.25rem;">{{ w.icon|default:'account_balance_wallet' }}</span>
+            <div>
+              <div style="font-weight: 600; font-size: 0.875rem;">{{ w.wallet_name }}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">{{ w.get_wallet_type_display }}</div>
+            </div>
+          </div>
+          <div class="tabular" style="font-weight: 700; font-size: 0.95rem;">
+            {{ w.balance|vnd }}₫
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script id="chartDaysData" type="application/json">{{ chart_days_json|safe }}</script>
+<script id="chartIncomeData" type="application/json">{{ chart_income_json|safe }}</script>
+<script id="chartExpenseData" type="application/json">{{ chart_expense_json|safe }}</script>
+<script id="donutLabelsData" type="application/json">{{ donut_labels_json|safe }}</script>
+<script id="donutDataData" type="application/json">{{ donut_data_json|safe }}</script>
+
+<script>
+  const parseJsonData = (id, fallback) => {
+    try {
+      const el = document.getElementById(id);
+      return el ? JSON.parse(el.textContent) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  };
+
+  // 1. Biểu đồ Dòng tiền 7 ngày
+  const ctxCashflow = document.getElementById('cashflowChart');
+  if (ctxCashflow) {
+    new Chart(ctxCashflow, {
+      type: 'line',
+      data: {
+        labels: parseJsonData('chartDaysData', []),
+        datasets: [
+          {
+            label: 'Thu nhập',
+            data: parseJsonData('chartIncomeData', []),
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          },
+          {
+            label: 'Chi tiêu',
+            data: parseJsonData('chartExpenseData', []),
+            borderColor: '#f43f5e',
+            backgroundColor: 'rgba(244, 63, 94, 0.08)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => `${context.dataset.label}: ${window.formatVND ? window.formatVND(context.parsed.y) : context.parsed.y}₫`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            grid: { color: '#f1f5f9' },
+            ticks: {
+              callback: (val) => val >= 1000000 ? `${(val/1000000).toFixed(1)}M` : (val >= 1000 ? `${(val/1000).toFixed(0)}k` : val)
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Biểu đồ Donut Cơ cấu Chi tiêu
+  const ctxDonut = document.getElementById('categoryDonutChart');
+  if (ctxDonut) {
+    new Chart(ctxDonut, {
+      type: 'doughnut',
+      data: {
+        labels: parseJsonData('donutLabelsData', []),
+        datasets: [{
+          data: parseJsonData('donutDataData', []),
+          backgroundColor: [
+            '#6366f1', '#f59e0b', '#ec4899', '#14b8a6', '#06b6d4',
+            '#8b5cf6', '#3b82f6', '#10b981', '#f43f5e'
+          ],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: ${window.formatVND ? window.formatVND(ctx.raw) : ctx.raw}₫`
+            }
+          }
+        },
+        cutout: '68%'
+      }
+    });
+  }
+
+  // 3. Xác nhận xóa giao dịch
+  document.querySelectorAll('.btn-confirm-delete-tx').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (!confirm('Bạn có chắc chắn muốn xóa giao dịch này không?')) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}
+

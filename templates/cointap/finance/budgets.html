@@ -1,0 +1,236 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Hạn Mức Ngân Sách - CoinTap{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Quản Lý Ngân Sách</h1>
+    <p style="color: var(--text-muted); font-size: 0.925rem;">Thiết lập hạn mức chi tiêu cho từng danh mục để kiểm soát tài chính chủ động</p>
+  </div>
+  <button onclick="openModal('createBudgetModal')" class="btn btn-primary">
+    <span class="material-symbols-outlined">add</span>
+    <span>Thiết lập ngân sách</span>
+  </button>
+</div>
+
+<!-- Thẻ KPI tổng ngân sách -->
+<div class="financial-pulse-grid">
+  <div class="card">
+    <div style="font-size: 0.825rem; color: var(--text-muted); font-weight: 600;">TỔNG HẠN MỨC ĐÃ ĐẶT</div>
+    <div class="tabular" style="font-size: 1.75rem; font-weight: 800; color: var(--text-main); margin-top: 0.25rem;">
+      {{ total_budget_limit|vnd }}₫
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size: 0.825rem; color: var(--text-muted); font-weight: 600;">TỔNG THỰC TẾ ĐÃ CHI</div>
+    <div class="tabular" style="font-size: 1.75rem; font-weight: 800; color: var(--accent-coral); margin-top: 0.25rem;">
+      {{ total_budget_spent|vnd }}₫
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size: 0.825rem; color: var(--text-muted); font-weight: 600;">HẠN MỨC CÒN LẠI KHẢ DỤNG</div>
+    <div class="tabular" style="font-size: 1.75rem; font-weight: 800; color: var(--accent-mint); margin-top: 0.25rem;">
+      {{ total_budget_remaining|vnd }}₫
+    </div>
+  </div>
+</div>
+
+<!-- Danh sách các danh mục ngân sách -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
+  {% for b in budget_items %}
+  <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); background-color: {{ b.category.color }}15; color: {{ b.category.color }}; display: flex; align-items: center; justify-content: center;">
+            <span class="material-symbols-outlined">{{ b.category.icon }}</span>
+          </div>
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 700;">{{ b.category.name }}</h3>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              {{ b.budget.start_date|date:"d/m" }} - {{ b.budget.end_date|date:"d/m/Y" }}
+            </div>
+          </div>
+        </div>
+
+        <span class="badge badge-{{ b.badge_class }}">{{ b.badge_text }}</span>
+      </div>
+
+      <!-- Thanh đo tiêu thụ -->
+      <div class="budget-meter" style="margin-bottom: 1.25rem;">
+        <div class="meter-track" style="height: 10px;">
+          <div class="meter-fill {{ b.badge_class }}" style="width: {{ b.percentage }}%;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;" class="tabular">
+          <span style="color: var(--text-secondary);">Đã tiêu: <strong style="color: var(--text-main);">{{ b.spent|vnd }}₫</strong></span>
+          <span style="font-weight: 700; color: var(--text-main);">Hạn mức: {{ b.limit|vnd }}₫</span>
+        </div>
+      </div>
+
+      <!-- Phân tích an toàn -->
+      <div style="background-color: #f8fafc; border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 0.825rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+          <span style="color: var(--text-muted);">Tỷ lệ tiêu thụ:</span>
+          <strong class="tabular" style="color: {% if b.raw_percentage >= 100 %}var(--accent-coral){% else %}var(--text-main){% endif %};">{{ b.raw_percentage|floatformat:1 }}%</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Khuyến nghị chi an toàn:</span>
+          <strong class="tabular" style="color: var(--accent-mint);">~{{ b.daily_safe|vnd }}₫/ngày</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; gap: 0.5rem; border-top: 1px solid var(--border-subtle); padding-top: 0.85rem;">
+      <button type="button"
+              class="btn btn-outline btn-sm btn-edit-budget"
+              data-id="{{ b.budget.budget_id }}"
+              data-amount="{{ b.limit|vnd }}"
+              data-start="{{ b.budget.start_date|date:'Y-m-d' }}"
+              data-end="{{ b.budget.end_date|date:'Y-m-d' }}"
+              style="flex: 1;">
+        <span class="material-symbols-outlined" style="font-size: 1rem;">edit</span>
+        <span>Điều chỉnh</span>
+      </button>
+      <a href="{% url 'budget_delete' b.budget.budget_id %}" class="btn btn-outline btn-sm btn-confirm-delete-budget" style="color: var(--accent-coral);" title="Xóa">
+        <span class="material-symbols-outlined" style="font-size: 1rem;">delete</span>
+      </a>
+    </div>
+  </div>
+  {% empty %}
+  <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+    <span class="material-symbols-outlined" style="font-size: 3rem; color: #cbd5e1;">track_changes</span>
+    <h3 style="font-size: 1.2rem; font-weight: 700; margin-top: 1rem;">Chưa có danh mục ngân sách nào</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; margin-bottom: 1.5rem;">
+      Thiết lập ngân sách giúp CoinTap và Trợ lý AI theo dõi và cảnh báo trước khi bạn chi tiêu quá tay.
+    </p>
+    <button onclick="openModal('createBudgetModal')" class="btn btn-primary">
+      <span class="material-symbols-outlined">add</span>
+      <span>Tạo hạn mức ngay</span>
+    </button>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: TẠO HẠN MỨC MỚI                                                    -->
+<!-- ========================================================================= -->
+<div id="createBudgetModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="card-title">Thiết Lập Ngân Sách Mới</h3>
+      <button onclick="closeModal('createBudgetModal')" class="btn btn-ghost btn-icon">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form action="{% url 'budget_create' %}" method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Chọn danh mục chi tiêu *</label>
+          <select name="category_id" class="form-control" required>
+            {% for c in expense_categories %}
+            <option value="{{ c.category_id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Hạn mức chi tối đa (VNĐ) *</label>
+          <input type="text" name="amount" class="form-control input-currency tabular" placeholder="Ví dụ: 1.500.000" required style="font-size: 1.25rem; font-weight: 700;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Ngày bắt đầu *</label>
+            <input type="date" name="start_date" class="form-control" value="{% now 'Y-m-01' %}" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày kết thúc *</label>
+            <input type="date" name="end_date" class="form-control" value="{% now 'Y-m-t' %}" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('createBudgetModal')" class="btn btn-outline">Hủy</button>
+        <button type="submit" class="btn btn-primary">Xác nhận tạo</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: SỬA HẠN MỨC                                                        -->
+<!-- ========================================================================= -->
+<div id="editBudgetModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="card-title">Điều Chỉnh Hạn Mức Ngân Sách</h3>
+      <button onclick="closeModal('editBudgetModal')" class="btn btn-ghost btn-icon">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="editBudgetForm" method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Hạn mức mới (VNĐ) *</label>
+          <input type="text" name="amount" id="editBudgetAmount" class="form-control input-currency tabular" required style="font-size: 1.25rem; font-weight: 700;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Ngày bắt đầu</label>
+            <input type="date" name="start_date" id="editBudgetStart" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày kết thúc</label>
+            <input type="date" name="end_date" id="editBudgetEnd" class="form-control" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('editBudgetModal')" class="btn btn-outline">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu điều chỉnh</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function openEditBudget(id, amount, startDate, endDate) {
+    const form = document.getElementById('editBudgetForm');
+    form.action = `/budgets/${id}/edit/`;
+    document.getElementById('editBudgetAmount').value = window.formatVND ? window.formatVND(amount) : amount;
+    document.getElementById('editBudgetStart').value = startDate;
+    document.getElementById('editBudgetEnd').value = endDate;
+    openModal('editBudgetModal');
+  }
+
+  document.querySelectorAll('.btn-edit-budget').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset;
+      openEditBudget(d.id, d.amount, d.start, d.end);
+    });
+  });
+
+  document.querySelectorAll('.btn-confirm-delete-budget').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (!confirm('Bạn có chắc muốn xóa hạn mức ngân sách này không?')) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}
+

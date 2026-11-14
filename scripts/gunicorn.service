@@ -1,0 +1,22 @@
+[Unit]
+Description=CoinTap Django Gunicorn Service
+After=network.target postgresql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/cointap
+EnvironmentFile=/var/www/cointap/.env
+ExecStart=/var/www/cointap/.venv/bin/gunicorn \
+          --workers 3 \
+          --bind unix:/run/cointap.sock \
+          --access-logfile /var/log/cointap_access.log \
+          --error-logfile /var/log/cointap_error.log \
+          cointap_web.wsgi:application
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

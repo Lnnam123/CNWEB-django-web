@@ -1,0 +1,298 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Sổ Cái Thu - Chi - CoinTap{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Nhật Ký Thu - Chi</h1>
+    <p style="color: var(--text-muted); font-size: 0.925rem;">Quản lý toàn bộ các giao dịch, tìm kiếm và phân loại dòng tiền</p>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="{% url 'transactions_export_csv' %}" class="btn btn-outline" title="Xuất ra file CSV cho Excel">
+      <span class="material-symbols-outlined">download</span>
+      <span>Xuất CSV</span>
+    </a>
+    <button onclick="openModal('quickAddTxModal')" class="btn btn-primary">
+      <span class="material-symbols-outlined">add</span>
+      <span>Thêm giao dịch</span>
+    </button>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- BỘ LỌC TÌM KIẾM GIAO DỊCH                                                  -->
+<!-- ========================================================================= -->
+<div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+  <form method="GET" action="{% url 'transactions_list' %}" class="filter-form-grid" style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 0.75rem; align-items: end;">
+    <div class="form-group">
+      <label class="form-label">Tìm kiếm ghi chú, nội dung</label>
+      <input type="text" name="q" value="{{ q_search }}" class="form-control" placeholder="Ví dụ: Phở, Tiền trọ, Lương...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Hình thức</label>
+      <select name="type" class="form-control">
+        <option value="ALL" {% if filter_type == 'ALL' %}selected{% endif %}>Tất cả thu & chi</option>
+        <option value="EXPENSE" {% if filter_type == 'EXPENSE' %}selected{% endif %}>Chỉ khoản chi [-]</option>
+        <option value="INCOME" {% if filter_type == 'INCOME' %}selected{% endif %}>Chỉ khoản thu [+]</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Ví thanh toán</label>
+      <select name="wallet" class="form-control">
+        <option value="">Tất cả các ví</option>
+        {% for w in wallets %}
+        <option value="{{ w.wallet_id }}" {% if filter_wallet == w.wallet_id|stringformat:"s" %}selected{% endif %}>{{ w.wallet_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Danh mục</label>
+      <select name="category" class="form-control">
+        <option value="">Tất cả danh mục</option>
+        {% for c in all_categories %}
+        <option value="{{ c.category_id }}" {% if filter_category == c.category_id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <button type="submit" class="btn btn-outline" style="height: 42px; width: 100%;">
+        <span class="material-symbols-outlined">filter_list</span>
+        <span>Lọc</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Thống kê tổng số sau khi lọc -->
+<div style="display: flex; gap: 1rem; margin-bottom: 1.25rem;">
+  <div class="card" style="flex: 1; padding: 1rem; border-left: 4px solid var(--accent-mint);">
+    <div style="font-size: 0.8rem; color: var(--text-muted);">Tổng thu (theo bộ lọc)</div>
+    <div class="tabular" style="font-size: 1.35rem; font-weight: 700; color: var(--accent-mint); margin-top: 0.25rem;">
+      +{{ total_income|vnd }}₫
+    </div>
+  </div>
+
+  <div class="card" style="flex: 1; padding: 1rem; border-left: 4px solid var(--accent-coral);">
+    <div style="font-size: 0.8rem; color: var(--text-muted);">Tổng chi (theo bộ lọc)</div>
+    <div class="tabular" style="font-size: 1.35rem; font-weight: 700; color: var(--accent-coral); margin-top: 0.25rem;">
+      -{{ total_expense|vnd }}₫
+    </div>
+  </div>
+</div>
+
+<!-- Bảng danh sách Giao dịch -->
+<div class="card" style="padding: 0; overflow: hidden;">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Thời gian</th>
+          <th>Phân loại</th>
+          <th>Danh mục</th>
+          <th>Ghi chú</th>
+          <th>Ví nguồn</th>
+          <th style="text-align: right;">Số tiền</th>
+          <th style="text-align: center;">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in page_obj %}
+        <tr>
+          <td style="color: var(--text-muted); font-size: 0.85rem;" class="tabular">
+            {{ t.transaction_date|date:"d/m/Y H:i" }}
+          </td>
+          <td>
+            {% if t.type == 'INCOME' %}
+            <span class="badge badge-mint">Thu vào</span>
+            {% else %}
+            <span class="badge badge-coral">Chi ra</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge" style="background-color: {{ t.category.color|default:'#6366F1' }}15; color: {{ t.category.color|default:'#6366F1' }};">
+              <span class="material-symbols-outlined" style="font-size: 0.95rem;">{{ t.category.icon|default:'sell' }}</span>
+              {{ t.category.name|default:'Khác' }}
+            </span>
+          </td>
+          <td style="font-weight: 600; color: var(--text-main);">
+            {{ t.note|default:"—" }}
+          </td>
+          <td>
+            <span style="font-size: 0.85rem; color: var(--text-secondary);">
+              {{ t.wallet.wallet_name }}
+            </span>
+          </td>
+          <td style="text-align: right;" class="tabular">
+            {% if t.type == 'INCOME' %}
+            <span style="color: var(--accent-mint); font-weight: 800; font-size: 1.05rem;">+{{ t.amount|vnd }}₫</span>
+            {% else %}
+            <span style="color: var(--accent-coral); font-weight: 800; font-size: 1.05rem;">-{{ t.amount|vnd }}₫</span>
+            {% endif %}
+          </td>
+          <td style="text-align: center;">
+            <div style="display: inline-flex; gap: 0.5rem;">
+              <button type="button"
+                      class="btn btn-outline btn-sm btn-icon btn-edit-tx"
+                      data-id="{{ t.transaction_id }}"
+                      data-amount="{{ t.amount|vnd }}"
+                      data-wallet="{{ t.wallet_id }}"
+                      data-category="{{ t.category_id }}"
+                      data-type="{{ t.type }}"
+                      data-note="{{ t.note|default:'' }}"
+                      data-date="{{ t.transaction_date|date:'Y-m-d\TH:i' }}"
+                      title="Chỉnh sửa">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+              </button>
+              <a href="{% url 'transaction_delete' t.transaction_id %}" class="btn btn-outline btn-sm btn-icon btn-delete-tx" data-amount="{{ t.amount|vnd }}" style="color: var(--accent-coral);" title="Xóa">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete</span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            Không tìm thấy giao dịch nào phù hợp với bộ lọc.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phân trang -->
+  {% if page_obj.has_other_pages %}
+  <div style="padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-subtle); background-color: #f8fafc;">
+    <div style="font-size: 0.85rem; color: var(--text-muted);">
+      Hiển thị trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} (Tổng cộng {{ page_obj.paginator.count }} giao dịch)
+    </div>
+    <div style="display: flex; gap: 0.35rem;">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}&q={{ q_search }}&type={{ filter_type }}&wallet={{ filter_wallet }}&category={{ filter_category }}" class="btn btn-outline btn-sm">Trước</a>
+      {% endif %}
+
+      {% for p in page_obj.paginator.page_range %}
+      {% if p == page_obj.number %}
+      <span class="btn btn-primary btn-sm">{{ p }}</span>
+      {% elif p >= page_obj.number|add:"-2" and p <= page_obj.number|add:"2" %}
+      <a href="?page={{ p }}&q={{ q_search }}&type={{ filter_type }}&wallet={{ filter_wallet }}&category={{ filter_category }}" class="btn btn-outline btn-sm">{{ p }}</a>
+      {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}&q={{ q_search }}&type={{ filter_type }}&wallet={{ filter_wallet }}&category={{ filter_category }}" class="btn btn-outline btn-sm">Tiếp</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: SỬA GIAO DỊCH                                                      -->
+<!-- ========================================================================= -->
+<div id="editTxModal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="card-title">Chỉnh Sửa Giao Dịch</h3>
+      <button onclick="closeModal('editTxModal')" class="btn btn-ghost btn-icon">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="editTxForm" method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <label style="flex: 1; text-align: center; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer;">
+            <input type="radio" name="type" id="editTypeExpense" value="EXPENSE"> Khoản chi [-]
+          </label>
+          <label style="flex: 1; text-align: center; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer;">
+            <input type="radio" name="type" id="editTypeIncome" value="INCOME"> Khoản thu [+]
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Số tiền (VNĐ) *</label>
+          <input type="text" name="amount" id="editTxAmount" class="form-control input-currency tabular" required style="font-size: 1.25rem; font-weight: 700;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ví thanh toán *</label>
+          <select name="wallet_id" id="editTxWallet" class="form-control" required>
+            {% for w in wallets %}
+            <option value="{{ w.wallet_id }}">{{ w.wallet_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Danh mục *</label>
+          <select name="category_id" id="editTxCategory" class="form-control" required>
+            {% for c in all_categories %}
+            <option value="{{ c.category_id }}">{{ c.name }} ({{ c.get_type_display }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ngày giao dịch</label>
+          <input type="datetime-local" name="transaction_date" id="editTxDate" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ghi chú</label>
+          <input type="text" name="note" id="editTxNote" class="form-control">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('editTxModal')" class="btn btn-outline">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function openEditTx(id, amount, walletId, categoryId, type, note, txDate) {
+    const form = document.getElementById('editTxForm');
+    form.action = `/transactions/${id}/edit/`;
+    document.getElementById('editTxAmount').value = window.formatVND ? window.formatVND(amount) : amount;
+    document.getElementById('editTxWallet').value = walletId;
+    document.getElementById('editTxCategory').value = categoryId;
+    document.getElementById('editTxNote').value = note || '';
+    document.getElementById('editTxDate').value = txDate;
+
+    if (type === 'INCOME') {
+      document.getElementById('editTypeIncome').checked = true;
+    } else {
+      document.getElementById('editTypeExpense').checked = true;
+    }
+
+    openModal('editTxModal');
+  }
+
+  document.querySelectorAll('.btn-edit-tx').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset;
+      openEditTx(d.id, d.amount, d.wallet, d.category, d.type, d.note, d.date);
+    });
+  });
+
+  document.querySelectorAll('.btn-delete-tx').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const amount = link.dataset.amount;
+      if (!confirm(`Bạn chắc chắn muốn xóa giao dịch ${amount}₫? Số tiền sẽ được hoàn trả lại ví.`)) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+{% endblock %}
+

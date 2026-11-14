@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CoinTap - Quản Lý Chi Tiêu & Trợ Lý Tài Chính AI{% endblock %}</title>
+
+  <!-- Google Fonts: Manrope (Đồng bộ chuẩn 100% với web_admin) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Google Material Symbols Rounded & Outlined -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Chart.js 4.4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- CoinTap Custom Design System -->
+  <link rel="stylesheet" href="/static/css/cointap.css?v=3.3">
+  <script>
+    if (localStorage.getItem('cointap_sidebar_collapsed') === 'true' && window.innerWidth > 768) {
+      document.documentElement.classList.add('sidebar-is-collapsed');
+    }
+  </script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Toast Notification Alerts Container -->
+  {% if messages %}
+  <div class="toast-container">
+    {% for msg in messages %}
+    <div class="toast {{ msg.tags }}">
+      <span class="material-symbols-outlined" style="font-size: 1.25rem;">
+        {% if msg.tags == 'success' %}check_circle
+        {% elif msg.tags == 'error' %}error
+        {% else %}info{% endif %}
+      </span>
+      <div>{{ msg }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="app-container">
+    <!-- 1. Thanh điều hướng bên trái (App Sidebar) -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="{% url 'dashboard' %}" class="brand-badge" id="brandLogoLink" title="CoinTap">
+          <div class="brand-logo-wrap">
+            <img src="/static/img/icon.png" alt="CoinTap" class="brand-logo-img" width="36" height="36">
+          </div>
+          <div class="brand-text">
+            <div class="brand-title">CoinTap</div>
+            <div class="brand-subtitle">Quản lý chi tiêu</div>
+          </div>
+        </a>
+        <button id="sidebarHeaderToggle" class="btn-sidebar-toggle" title="Thu gọn menu">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Cá nhân</div>
+
+        <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" data-tooltip="Tổng quan">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span>Tổng quan</span>
+        </a>
+
+        <a href="{% url 'wallets_list' %}" class="nav-link {% if 'wallet' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Ví tiền">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+          <span>Ví tiền</span>
+          {% if user_wallets %}
+          <span class="nav-badge">{{ user_wallets|length }}</span>
+          {% endif %}
+        </a>
+
+        <a href="{% url 'transactions_list' %}" class="nav-link {% if 'transaction' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Thu - Chi">
+          <span class="material-symbols-outlined">receipt_long</span>
+          <span>Thu - Chi</span>
+        </a>
+
+        <a href="{% url 'budgets_list' %}" class="nav-link {% if 'budget' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Ngân sách">
+          <span class="material-symbols-outlined">track_changes</span>
+          <span>Ngân sách</span>
+        </a>
+
+        <a href="{% url 'categories_list' %}" class="nav-link {% if 'categorie' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Danh mục">
+          <span class="material-symbols-outlined">category</span>
+          <span>Danh mục</span>
+        </a>
+
+        <a href="{% url 'reports' %}" class="nav-link {% if 'report' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Báo cáo">
+          <span class="material-symbols-outlined">monitoring</span>
+          <span>Báo cáo</span>
+        </a>
+
+        <div class="nav-section-title">Trí tuệ nhân tạo</div>
+
+        <a href="{% url 'ai_assistant' %}" class="nav-link {% if 'ai' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Trợ lý AI">
+          <span class="material-symbols-outlined" style="color: #818cf8;">psychology</span>
+          <span>Trợ lý AI</span>
+          <span class="badge badge-indigo" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">Gemini</span>
+        </a>
+
+        <div class="nav-section-title">Hệ thống</div>
+
+        <a href="{% url 'notifications_list' %}" class="nav-link {% if 'notification' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Thông báo">
+          <span class="material-symbols-outlined">notifications</span>
+          <span>Thông báo</span>
+          {% if unread_notifications_count > 0 %}
+          <span class="nav-badge alert">{{ unread_notifications_count }}</span>
+          {% endif %}
+        </a>
+
+        {% if current_admin %}
+        <a href="{% url 'admin_dashboard' %}" class="nav-link nav-link-admin" data-tooltip="Quản trị hệ thống">
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <span>Quản trị hệ thống</span>
+        </a>
+        {% endif %}
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-pill">
+          <div class="avatar">
+            {{ current_user.full_name|slice:":1"|default:"U"|upper }}
+          </div>
+          <div class="user-info-text">
+            <div class="user-info-name">{{ current_user.full_name|default:"Khách" }}</div>
+            <div class="user-info-role">{{ current_user.email|default:"user@cointap.vn" }}</div>
+          </div>
+          <a href="{% url 'logout' %}" class="sidebar-logout-btn" title="Đăng xuất" data-tooltip="Đăng xuất">
+            <span class="material-symbols-outlined" style="font-size: 1.2rem;">logout</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 2. Khu vực hiển thị nội dung chính (Main Area) -->
+    <div class="app-main">
+      <!-- Topbar Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button id="sidebarToggle" class="sidebar-toggle-btn" title="Thu gọn / Mở rộng menu">
+            <span class="material-symbols-outlined" style="font-size: 1.35rem;">menu</span>
+          </button>
+          <div id="liveClock" class="live-clock-pill">
+            <span class="material-symbols-outlined" style="font-size: 1rem;">schedule</span>
+            <span>Đang đồng bộ...</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Nút Thêm giao dịch nhanh -->
+          <button onclick="openModal('quickAddTxModal')" class="btn btn-primary btn-sm">
+            <span class="material-symbols-outlined" style="font-size: 1.1rem;">add</span>
+            <span>Thêm giao dịch</span>
+          </button>
+
+          <!-- Nút Chuyển tiền ví -->
+          <button onclick="openModal('quickTransferModal')" class="btn btn-outline btn-sm">
+            <span class="material-symbols-outlined" style="font-size: 1.1rem;">swap_horiz</span>
+            <span>Chuyển ví</span>
+          </button>
+
+          <!-- Chuông thông báo -->
+          <a href="{% url 'notifications_list' %}" class="btn btn-outline btn-icon" style="position: relative;" title="Thông báo">
+            <span class="material-symbols-outlined">notifications</span>
+            {% if unread_notifications_count > 0 %}
+            <span style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background-color: var(--accent-coral); border-radius: 50%;"></span>
+            {% endif %}
+          </a>
+
+          <!-- Menu cá nhân -->
+          <a href="{% url 'profile' %}" class="btn btn-outline btn-sm" title="Hồ sơ tài khoản">
+            <span class="material-symbols-outlined" style="font-size: 1.1rem;">person</span>
+            <span>{{ current_user.full_name|truncatechars:12 }}</span>
+          </a>
+        </div>
+      </header>
+
+      <!-- Nội dung từng trang kế thừa -->
+      <main class="app-content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: THÊM NHANH GIAO DỊCH THU / CHI                                   -->
+  <!-- ========================================================================= -->
+  <div id="quickAddTxModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="card-title">Thêm Giao Dịch Mới</h3>
+        <button onclick="closeModal('quickAddTxModal')" class="btn btn-ghost btn-icon">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form action="{% url 'transaction_create' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <label style="flex: 1; text-align: center; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer;" id="labelExpense">
+              <input type="radio" name="type" value="EXPENSE" checked style="margin-right: 0.25rem;"> Khoản chi [-]
+            </label>
+            <label style="flex: 1; text-align: center; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer;" id="labelIncome">
+              <input type="radio" name="type" value="INCOME" style="margin-right: 0.25rem;"> Khoản thu [+]
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Số tiền (VNĐ) *</label>
+            <input type="text" name="amount" class="form-control input-currency tabular" placeholder="Ví dụ: 50.000" required style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ví thanh toán *</label>
+            <select name="wallet_id" class="form-control" required>
+              {% for w in user_wallets %}
+              <option value="{{ w.wallet_id }}">{{ w.wallet_name }} ({{ w.balance|vnd }}₫)</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Danh mục *</label>
+            <select name="category_id" class="form-control" required>
+              {% for c in categories_expense %}
+              <option value="{{ c.category_id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày giao dịch</label>
+            <input type="datetime-local" name="transaction_date" class="form-control" value="{% now 'Y-m-d\TH:i' %}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ghi chú chi tiết</label>
+            <input type="text" name="note" class="form-control" placeholder="Ví dụ: Cơm trưa, Xăng xe, Lương...">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" onclick="closeModal('quickAddTxModal')" class="btn btn-outline">Hủy bỏ</button>
+          <button type="submit" class="btn btn-primary">Lưu giao dịch</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 2: CHUYỂN TIỀN GIỮA CÁC VÍ                                          -->
+  <!-- ========================================================================= -->
+  <div id="quickTransferModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="card-title">Chuyển Tiền Giữa Các Ví</h3>
+        <button onclick="closeModal('quickTransferModal')" class="btn btn-ghost btn-icon">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form action="{% url 'wallet_transfer' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Từ ví nguồn *</label>
+            <select name="source_wallet_id" class="form-control" required>
+              {% for w in user_wallets %}
+              <option value="{{ w.wallet_id }}">{{ w.wallet_name }} - Số dư: {{ w.balance|vnd }}₫</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Đến ví đích *</label>
+            <select name="target_wallet_id" class="form-control" required>
+              {% for w in user_wallets %}
+              <option value="{{ w.wallet_id }}" {% if forloop.counter == 2 %}selected{% endif %}>{{ w.wallet_name }} - Số dư: {{ w.balance|vnd }}₫</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Số tiền chuyển (VNĐ) *</label>
+            <input type="text" name="amount" class="form-control input-currency tabular" placeholder="Ví dụ: 100.000" required style="font-size: 1.25rem; font-weight: 700;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ghi chú (Tùy chọn)</label>
+            <input type="text" name="note" class="form-control" placeholder="Ví dụ: Rút tiền ATM về ví tiền mặt">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" onclick="closeModal('quickTransferModal')" class="btn btn-outline">Hủy bỏ</button>
+          <button type="submit" class="btn btn-success">Xác nhận chuyển</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interactive JavaScript -->
+  <script src="/static/js/cointap.js?v=3.3"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+

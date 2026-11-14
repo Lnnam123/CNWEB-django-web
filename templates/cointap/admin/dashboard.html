@@ -1,0 +1,228 @@
+{% extends 'cointap/base_admin.html' %}
+
+{% block title %}Admin Dashboard KPI - CoinTap{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Dashboard Quản Trị Hệ Thống</h1>
+  <p style="color: var(--text-muted); font-size: 0.925rem;">Giám sát sức khỏe tổng thể, số lượng người dùng, ví tiền và dòng tiền hệ thống</p>
+</div>
+
+<!-- 4 Thẻ KPI chính của Hệ thống -->
+<div class="financial-pulse-grid">
+  <!-- KPI 1: Tổng người dùng -->
+  <div class="card" style="border-left: 4px solid var(--brand-primary);">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">TỔNG NGƯỜI DÙNG</div>
+        <div class="tabular" style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-top: 0.25rem;">
+          {{ total_users_count }}
+        </div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--brand-light); color: var(--brand-primary); display: flex; align-items: center; justify-content: center;">
+        <span class="material-symbols-outlined" style="font-size: 1.5rem;">group</span>
+      </div>
+    </div>
+    <div style="margin-top: 0.75rem;">
+      <a href="{% url 'admin_users' %}" style="font-size: 0.8rem; color: var(--brand-primary); font-weight: 600; text-decoration: none;">Xem danh sách →</a>
+    </div>
+  </div>
+
+  <!-- KPI 2: Tổng ví tiền lưu hành -->
+  <div class="card" style="border-left: 4px solid var(--accent-mint);">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">TỔNG SỐ VÍ TIỀN</div>
+        <div class="tabular" style="font-size: 2rem; font-weight: 800; color: var(--accent-mint); margin-top: 0.25rem;">
+          {{ total_wallets_count }}
+        </div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--accent-mint-bg); color: var(--accent-mint); display: flex; align-items: center; justify-content: center;">
+        <span class="material-symbols-outlined" style="font-size: 1.5rem;">account_balance_wallet</span>
+      </div>
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted);">
+      Tổng tài sản: <strong class="tabular" style="color: var(--text-main);">{{ total_system_cash|vnd }}₫</strong>
+    </div>
+  </div>
+
+  <!-- KPI 3: Tổng giao dịch thực hiện -->
+  <div class="card" style="border-left: 4px solid var(--accent-amber);">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">TỔNG GIAO DỊCH</div>
+        <div class="tabular" style="font-size: 2rem; font-weight: 800; color: var(--accent-amber); margin-top: 0.25rem;">
+          {{ total_transactions_count }}
+        </div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--accent-amber-bg); color: var(--accent-amber); display: flex; align-items: center; justify-content: center;">
+        <span class="material-symbols-outlined" style="font-size: 1.5rem;">receipt_long</span>
+      </div>
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted);">
+      Thu: +{{ total_system_income|vnd }}₫ | Chi: -{{ total_system_expense|vnd }}₫
+    </div>
+  </div>
+
+  <!-- KPI 4: Phiên vấn đáp Gemini AI -->
+  <div class="card" style="border-left: 4px solid #8b5cf6;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">PHIÊN TRỢ LÝ AI</div>
+        <div class="tabular" style="font-size: 2rem; font-weight: 800; color: #8b5cf6; margin-top: 0.25rem;">
+          {{ total_ai_sessions_count }}
+        </div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: #f5f3ff; color: #8b5cf6; display: flex; align-items: center; justify-content: center;">
+        <span class="material-symbols-outlined" style="font-size: 1.5rem;">smart_toy</span>
+      </div>
+    </div>
+    <div style="margin-top: 0.75rem;">
+      <a href="{% url 'admin_ai_logs' %}" style="font-size: 0.8rem; color: #8b5cf6; font-weight: 600; text-decoration: none;">Xem nhật ký vấn đáp →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Biểu đồ & Top danh mục -->
+<div class="dashboard-two-col-grid" style="margin-bottom: 2rem;">
+  <!-- Biểu đồ phân bổ danh mục hệ thống -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Tần Suất Sử Dụng Danh Mục</h2>
+        <p style="font-size: 0.825rem; color: var(--text-muted);">Số lượng giao dịch phân bổ theo danh mục mẫu</p>
+      </div>
+    </div>
+    <div style="height: 280px; position: relative;">
+      <canvas id="adminCatChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Quick Info Box -->
+  <div class="card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #ffffff;">
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+      <span class="material-symbols-outlined" style="font-size: 2rem; color: #a78bfa;">dns</span>
+      <div>
+        <h2 style="font-size: 1.1rem; font-weight: 700;">Hệ Quản Trị CSDL Độc Lập</h2>
+        <p style="font-size: 0.8rem; color: #94a3b8;">Sẵn sàng chạy trên máy chủ Linux riêng</p>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.875rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #94a3b8;">Đồng bộ Supabase:</span>
+        <span class="badge badge-mint">Hoàn tất 100%</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #94a3b8;">Hỗ trợ Trigger ví:</span>
+        <span class="badge badge-indigo">update_wallet_balance()</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #94a3b8;">Môi trường triển khai:</span>
+        <strong style="color: #ffffff;">PostgreSQL 14+ / Linux</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #94a3b8;">Trợ lý AI Engine:</span>
+        <strong style="color: #38bdf8;">Gemini 1.5 + Fallback</strong>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <a href="{% url 'admin_broadcast' %}" class="btn btn-primary" style="width: 100%;">
+        <span class="material-symbols-outlined">campaign</span>
+        <span>Phát thông báo cho toàn hệ thống</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Bảng Giao Dịch Toàn Hệ Thống -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">Luồng Dòng Tiền Toàn Hệ Thống (Mới Nhất)</h2>
+      <p style="font-size: 0.825rem; color: var(--text-muted);">Giám sát các giao dịch theo thời gian thực</p>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mã GD</th>
+          <th>Người dùng</th>
+          <th>Thời gian</th>
+          <th>Danh mục</th>
+          <th>Ghi chú</th>
+          <th>Ví</th>
+          <th style="text-align: right;">Số tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in recent_transactions %}
+        <tr>
+          <td class="tabular" style="color: var(--text-muted); font-size: 0.8rem;">#{{ t.transaction_id }}</td>
+          <td>
+            <div style="font-weight: 700; font-size: 0.875rem;">{{ t.user.full_name }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ t.user.email }}</div>
+          </td>
+          <td class="tabular" style="color: var(--text-muted); font-size: 0.825rem;">
+            {{ t.transaction_date|date:"d/m/Y H:i" }}
+          </td>
+          <td>
+            <span class="badge" style="background-color: {{ t.category.color|default:'#6366F1' }}15; color: {{ t.category.color|default:'#6366F1' }};">
+              {{ t.category.name|default:'Khác' }}
+            </span>
+          </td>
+          <td style="font-weight: 500;">{{ t.note|default:"—" }}</td>
+          <td>{{ t.wallet.wallet_name }}</td>
+          <td style="text-align: right;" class="tabular">
+            {% if t.type == 'INCOME' %}
+            <span style="color: var(--accent-mint); font-weight: 700;">+{{ t.amount|vnd }}₫</span>
+            {% else %}
+            <span style="color: var(--accent-coral); font-weight: 700;">-{{ t.amount|vnd }}₫</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            Chưa có giao dịch nào trên hệ thống.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const ctxAdmin = document.getElementById('adminCatChart');
+  if (ctxAdmin) {
+    new Chart(ctxAdmin, {
+      type: 'bar',
+      data: {
+        labels: {{ cat_names_json|safe }},
+        datasets: [{
+          label: 'Số giao dịch',
+          data: {{ cat_counts_json|safe }},
+          backgroundColor: '#7c3aed',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}
+

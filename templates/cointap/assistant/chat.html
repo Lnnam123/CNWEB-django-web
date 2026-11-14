@@ -1,0 +1,103 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Trợ Lý Tài Chính CoinTap AI (Gemini){% endblock %}
+
+{% block content %}
+<div class="chat-container">
+  <!-- 1. Danh sách các phiên trò chuyện bên trái -->
+  <aside class="chat-sessions-sidebar">
+    <div class="sessions-header">
+      <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+        <span class="material-symbols-outlined" style="color: var(--brand-primary); font-size: 1.25rem;">forum</span>
+        Lịch Sử Trò Chuyện
+      </div>
+      <a href="{% url 'ai_new_session' %}" class="btn btn-primary btn-sm btn-icon" title="Tạo cuộc trò chuyện mới">
+        <span class="material-symbols-outlined" style="font-size: 1.1rem;">add</span>
+      </a>
+    </div>
+
+    <div class="sessions-list">
+      {% for conv in conversations %}
+      <div style="display: flex; align-items: center; justify-content: space-between; border-radius: var(--radius-sm); margin-bottom: 2px;" class="{% if active_conversation.session_id == conv.session_id %}active{% endif %}">
+        <a href="?session={{ conv.session_id }}" class="session-item {% if active_conversation.session_id == conv.session_id %}active{% endif %}" style="flex: 1; min-width: 0;">
+          <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            {{ conv.title }}
+          </div>
+        </a>
+        <a href="{% url 'ai_delete_session' conv.session_id %}" onclick="return confirm('Xóa cuộc trò chuyện này?');" style="color: #94a3b8; padding: 0.25rem 0.5rem; text-decoration: none;" title="Xóa">
+          <span class="material-symbols-outlined" style="font-size: 1rem;">close</span>
+        </a>
+      </div>
+      {% empty %}
+      <div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+        Chưa có phiên trò chuyện nào. Bấm nút <strong>+</strong> phía trên để bắt đầu!
+      </div>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <!-- 2. Khung chat chính bên phải -->
+  <div class="chat-main">
+    <div class="chat-header">
+      <div style="width: 42px; height: 42px; border-radius: var(--radius-sm); background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);">
+        <span class="material-symbols-outlined" style="font-size: 1.5rem;">psychology</span>
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <h2 style="font-size: 1.05rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          {{ active_conversation.title|default:"CoinTap AI Financial Advisor" }}
+        </h2>
+        <div style="font-size: 0.775rem; color: var(--accent-mint); display: flex; align-items: center; gap: 0.35rem;">
+          <span style="width: 7px; height: 7px; background-color: var(--accent-mint); border-radius: 50%;"></span>
+          Đang kết nối • Trợ lý tài chính cá nhân sẵn sàng
+        </div>
+      </div>
+    </div>
+
+    <!-- Hộp tin nhắn -->
+    <div class="chat-messages" id="chatMessages">
+      {% for msg in messages %}
+      <div class="chat-bubble {% if msg.is_user %}user{% else %}ai{% endif %}">
+        {% if msg.is_user %}
+          {{ msg.content }}
+        {% else %}
+          {{ msg.content|linebreaksbr }}
+        {% endif %}
+        <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 0.35rem; text-align: right;" class="tabular">
+          {{ msg.created_at|date:"H:i - d/m" }}
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        <span class="material-symbols-outlined" style="font-size: 3rem; color: #818cf8; margin-bottom: 0.5rem;">smart_toy</span>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Xin chào {{ current_user.full_name }}!</h3>
+        <p style="font-size: 0.875rem; margin-top: 0.25rem;">Mình là CoinTap AI. Hãy chọn một câu hỏi gợi ý bên dưới hoặc nhập câu hỏi của riêng bạn nhé.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Gợi ý câu hỏi nhanh -->
+    <div style="padding: 0.5rem 1.5rem; background-color: #f8fafc; border-top: 1px solid var(--border-subtle); display: flex; gap: 0.5rem; overflow-x: auto; white-space: nowrap;">
+      {% for p in suggested_prompts %}
+      <button type="button" class="btn btn-outline btn-sm prompt-suggestion-pill" data-prompt="{{ p }}" style="font-size: 0.8rem; background: #ffffff; border-radius: var(--radius-full);">
+        <span class="material-symbols-outlined" style="font-size: 0.95rem; color: var(--brand-primary);">chat_bubble_outline</span>
+        <span>{{ p }}</span>
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- Thanh nhập tin nhắn -->
+    <div class="chat-input-bar">
+      <form id="aiChatForm" class="chat-input-form">
+        {% csrf_token %}
+        <input type="hidden" id="chatSessionId" value="{{ active_conversation.session_id|default:'' }}">
+        <input type="text" id="chatInput" class="chat-input" placeholder="Nhập câu hỏi về tình hình tài chính của bạn..." required autocomplete="off">
+        <button type="submit" class="btn btn-primary" style="padding: 0 1.5rem;">
+          <span class="material-symbols-outlined">send</span>
+          <span>Gửi</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

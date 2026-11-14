@@ -1,0 +1,126 @@
+{% extends 'cointap/base_admin.html' %}
+
+{% block title %}Quản Lý Người Dùng - CoinTap Admin{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Danh Sách Người Dùng</h1>
+    <p style="color: var(--text-muted); font-size: 0.925rem;">Quản lý tài khoản người dùng ứng dụng di động & web, kiểm tra ví tiền và dòng tiền</p>
+  </div>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Họ và tên</th>
+          <th>Email</th>
+          <th>Số ví tiền</th>
+          <th style="text-align: right;">Tổng tài sản</th>
+          <th style="text-align: center;">Giao dịch</th>
+          <th>Ngày đăng ký</th>
+          <th style="text-align: center;">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in user_list %}
+        <tr>
+          <td class="tabular" style="font-weight: 700; color: var(--text-muted);">#{{ item.user.user_id }}</td>
+          <td>
+            <div style="font-weight: 700; color: var(--text-main);">{{ item.user.full_name }}</div>
+          </td>
+          <td>{{ item.user.email }}</td>
+          <td>
+            <span class="badge badge-indigo">{{ item.wallets|length }} ví</span>
+          </td>
+          <td style="text-align: right;" class="tabular">
+            <strong style="color: {% if item.total_balance >= 0 %}var(--accent-mint){% else %}var(--accent-coral){% endif %};">
+              {{ item.total_balance|vnd }}₫
+            </strong>
+          </td>
+          <td style="text-align: center;" class="tabular">
+            <span class="badge badge-neutral">{{ item.recent_transactions|length }}</span>
+          </td>
+          <td style="color: var(--text-muted); font-size: 0.85rem;" class="tabular">
+            {{ item.user.created_at|date:"d/m/Y H:i" }}
+          </td>
+          <td style="text-align: center;">
+            <div style="display: inline-flex; gap: 0.5rem;">
+              <button onclick="openUserDetailModal('{{ item.user.user_id }}')" class="btn btn-outline btn-sm">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">visibility</span>
+                <span>Xem ví</span>
+              </button>
+              <a href="{% url 'admin_user_delete' item.user.user_id %}" onclick="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản {{ item.user.full_name }} không? Toàn bộ ví và giao dịch sẽ bị xóa.');" class="btn btn-outline btn-sm btn-icon" style="color: var(--accent-coral);" title="Xóa tài khoản">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">delete</span>
+              </a>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Modal chi tiết từng User -->
+        <div id="userDetailModal_{{ item.user.user_id }}" class="modal-backdrop">
+          <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+              <div>
+                <h3 class="card-title">{{ item.user.full_name }}</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">{{ item.user.email }} • Mã người dùng: #{{ item.user.user_id }}</p>
+              </div>
+              <button onclick="closeModal('userDetailModal_{{ item.user.user_id }}')" class="btn btn-ghost btn-icon">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">Danh sách ví tiền của người dùng:</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;">
+                {% for w in item.wallets %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); border-left: 4px solid {{ w.color }};">
+                  <div>
+                    <div style="font-weight: 600; font-size: 0.875rem;">{{ w.wallet_name }} ({{ w.get_wallet_type_display }})</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Trạng thái: {{ w.is_active|yesno:"Đang dùng,Đã đóng" }}</div>
+                  </div>
+                  <div class="tabular" style="font-weight: 700; font-size: 1rem;">
+                    {{ w.balance|vnd }}₫
+                  </div>
+                </div>
+                {% empty %}
+                <div style="color: var(--text-muted); font-size: 0.85rem;">Người dùng chưa tạo ví nào.</div>
+                {% endfor %}
+              </div>
+
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">Giao dịch gần nhất:</h4>
+              <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                {% for tx in item.recent_transactions %}
+                <div style="display: flex; justify-content: space-between; font-size: 0.825rem; padding: 0.4rem 0; border-bottom: 1px dashed var(--border-subtle);">
+                  <span>{{ tx.transaction_date|date:"d/m" }} • {{ tx.note|default:tx.category.name }} ({{ tx.wallet.wallet_name }})</span>
+                  <span class="tabular" style="font-weight: 700; color: {% if tx.type == 'INCOME' %}var(--accent-mint){% else %}var(--accent-coral){% endif %};">
+                    {% if tx.type == 'INCOME' %}+{% else %}-{% endif %}{{ tx.amount|vnd }}₫
+                  </span>
+                </div>
+                {% empty %}
+                <div style="color: var(--text-muted); font-size: 0.85rem;">Chưa có giao dịch.</div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" onclick="closeModal('userDetailModal_{{ item.user.user_id }}')" class="btn btn-outline">Đóng</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function openUserDetailModal(userId) {
+    openModal(`userDetailModal_${userId}`);
+  }
+</script>
+{% endblock %}
+

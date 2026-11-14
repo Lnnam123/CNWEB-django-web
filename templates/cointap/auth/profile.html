@@ -1,0 +1,85 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Hồ Sơ Cá Nhân - CoinTap{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Hồ Sơ Tài Khoản</h1>
+    <p style="color: var(--text-muted); font-size: 0.925rem;">Quản lý thông tin định danh và bảo mật tài khoản cá nhân</p>
+  </div>
+
+  <div class="dashboard-two-col-grid">
+    <!-- Form 1: Cập nhật thông tin -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="material-symbols-outlined" style="color: var(--brand-primary);">badge</span>
+          Thông Tin Cá Nhân
+        </h2>
+      </div>
+
+      <form action="{% url 'profile' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_info">
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">Họ và tên</label>
+          <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">Địa chỉ Email</label>
+          <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Ngày tham gia CoinTap</label>
+          <input type="text" class="form-control" value="{{ user.created_at|date:'d/m/Y H:i' }}" disabled style="background-color: #f8fafc; color: #64748b;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <span class="material-symbols-outlined">save</span>
+          <span>Cập nhật hồ sơ</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Form 2: Đổi mật khẩu -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="material-symbols-outlined" style="color: var(--accent-coral);">lock_reset</span>
+          Đổi Mật Khẩu
+        </h2>
+      </div>
+
+      <form action="{% url 'profile' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="change_password">
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">Mật khẩu hiện tại</label>
+          <input type="password" name="old_password" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">Mật khẩu mới</label>
+          <input type="password" name="new_password" class="form-control" placeholder="Tối thiểu 6 ký tự" required minlength="6">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Xác nhận mật khẩu mới</label>
+          <input type="password" name="confirm_password" class="form-control" placeholder="Nhập lại mật khẩu mới" required minlength="6">
+        </div>
+
+        <button type="submit" class="btn btn-outline" style="width: 100%;">
+          <span class="material-symbols-outlined">key</span>
+          <span>Xác nhận đổi mật khẩu</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

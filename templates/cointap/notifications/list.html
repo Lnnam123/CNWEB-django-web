@@ -1,0 +1,74 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Trung Tâm Thông Báo - CoinTap{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Trung Tâm Thông Báo</h1>
+      <p style="color: var(--text-muted); font-size: 0.925rem;">Cập nhật hệ thống, cảnh báo hạn mức ngân sách và biến động tài chính</p>
+    </div>
+    {% if notifications %}
+    <a href="{% url 'notification_mark_all_read' %}" class="btn btn-outline btn-sm">
+      <span class="material-symbols-outlined">done_all</span>
+      <span>Đánh dấu tất cả đã đọc</span>
+    </a>
+    {% endif %}
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+    {% for n in notifications %}
+    <div class="card" style="padding: 1.25rem; display: flex; align-items: flex-start; gap: 1rem; {% if not n.is_read %}border-left: 4px solid var(--brand-primary); background-color: #faf5ff;{% endif %}">
+      <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; 
+        {% if n.type == 'BUDGET_ALERT' %}background-color: var(--accent-coral-bg); color: var(--accent-coral);
+        {% elif n.type == 'WARNING' %}background-color: var(--accent-amber-bg); color: var(--accent-amber);
+        {% else %}background-color: var(--brand-light); color: var(--brand-primary);{% endif %}">
+        <span class="material-symbols-outlined">
+          {% if n.type == 'BUDGET_ALERT' %}warning
+          {% elif n.type == 'WARNING' %}error_outline
+          {% else %}info{% endif %}
+        </span>
+      </div>
+
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-main);">{{ n.title }}</h3>
+          <span style="font-size: 0.775rem; color: var(--text-muted);" class="tabular">{{ n.created_at|date:"H:i - d/m/Y" }}</span>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.5rem;">
+          {{ n.content }}
+        </p>
+        <div>
+          {% if n.type == 'BUDGET_ALERT' %}
+          <span class="badge badge-coral">Cảnh báo ngân sách</span>
+          {% elif n.type == 'WARNING' %}
+          <span class="badge badge-amber">Cảnh báo</span>
+          {% else %}
+          <span class="badge badge-indigo">Hệ thống</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.35rem;">
+        {% if not n.is_read %}
+        <a href="{% url 'notification_mark_read' n.notification_id %}" class="btn btn-outline btn-sm btn-icon" title="Đánh dấu đã đọc">
+          <span class="material-symbols-outlined" style="font-size: 1.1rem; color: var(--accent-mint);">check</span>
+        </a>
+        {% endif %}
+        <a href="{% url 'notification_delete' n.notification_id %}" onclick="return confirm('Xóa thông báo này?');" class="btn btn-outline btn-sm btn-icon" style="color: var(--accent-coral);" title="Xóa">
+          <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete</span>
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="card" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+      <span class="material-symbols-outlined" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 0.5rem;">notifications_off</span>
+      <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Hộp thông báo trống</h3>
+      <p style="font-size: 0.875rem; margin-top: 0.25rem;">Hiện tại bạn không có thông báo hay cảnh báo tài chính nào.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+

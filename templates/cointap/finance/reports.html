@@ -1,0 +1,227 @@
+{% extends 'cointap/base.html' %}
+
+{% block title %}Báo Cáo & Phân Tích Tài Chính - CoinTap{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+  <div>
+    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Báo Cáo & Phân Tích</h1>
+    <p style="color: var(--text-muted); font-size: 0.925rem;">Trực quan hóa xu hướng thu chi, cơ cấu chi tiêu và sức khỏe tài chính</p>
+  </div>
+  <!-- Bộ chọn tháng / năm -->
+  <form method="GET" action="{% url 'reports' %}" style="display: flex; align-items: center; gap: 0.5rem;">
+    <input type="month" name="month" value="{{ selected_month_str }}" class="form-control" style="width: auto;" onchange="this.form.submit()">
+    <button type="submit" class="btn btn-outline btn-sm">Xem</button>
+  </form>
+</div>
+
+<!-- Lời khuyên sức khỏe tài chính -->
+<div class="card" style="margin-bottom: 1.75rem; border-left: 5px solid {% if health_color == 'success' %}var(--accent-mint){% elif health_color == 'info' %}var(--brand-primary){% else %}var(--accent-coral){% endif %}; background: #ffffff;">
+  <div style="display: flex; align-items: flex-start; gap: 1rem;">
+    <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: {% if health_color == 'success' %}var(--accent-mint-bg){% elif health_color == 'info' %}var(--brand-light){% else %}var(--accent-coral-bg){% endif %}; display: flex; align-items: center; justify-content: center; color: {% if health_color == 'success' %}var(--accent-mint){% elif health_color == 'info' %}var(--brand-primary){% else %}var(--accent-coral){% endif %};">
+      <span class="material-symbols-outlined" style="font-size: 1.75rem;">
+        {% if health_color == 'success' %}verified{% elif health_color == 'info' %}lightbulb{% else %}warning{% endif %}
+      </span>
+    </div>
+    <div style="flex: 1;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 700;">Đánh giá sức khỏe tài chính tháng {{ sel_month }}/{{ sel_year }}:</h3>
+        <span class="badge badge-{% if health_color == 'success' %}mint{% elif health_color == 'info' %}indigo{% else %}coral{% endif %}">{{ health_status }}</span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">{{ health_tip }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4 Thẻ KPI Phân tích -->
+<div class="financial-pulse-grid">
+  <div class="card">
+    <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">TỔNG THU NHẬP</div>
+    <div class="tabular" style="font-size: 1.65rem; font-weight: 800; color: var(--accent-mint); margin-top: 0.25rem;">
+      +{{ total_income|vnd }}₫
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">TỔNG CHI TIÊU</div>
+    <div class="tabular" style="font-size: 1.65rem; font-weight: 800; color: var(--accent-coral); margin-top: 0.25rem;">
+      -{{ total_expense|vnd }}₫
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">THẶNG DƯ TÍCH LŨY</div>
+    <div class="tabular" style="font-size: 1.65rem; font-weight: 800; color: {% if net_savings >= 0 %}var(--brand-primary){% else %}var(--accent-coral){% endif %}; margin-top: 0.25rem;">
+      {% if net_savings >= 0 %}+{% endif %}{{ net_savings|vnd }}₫
+    </div>
+    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Tỷ lệ tích lũy: {{ savings_rate|floatformat:1 }}%</div>
+  </div>
+
+  <div class="card">
+    <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">CHI TIÊU BÌNH QUÂN/NGÀY</div>
+    <div class="tabular" style="font-size: 1.65rem; font-weight: 800; color: var(--text-main); margin-top: 0.25rem;">
+      {{ avg_daily_expense|vnd }}₫
+    </div>
+    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Trung bình mỗi ngày</div>
+  </div>
+</div>
+
+<!-- Biểu đồ Xu hướng 6 tháng gần nhất (Bar Chart) -->
+<div class="card" style="margin-bottom: 2rem;">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">Xu Hướng Thu - Chi 6 Tháng Gần Nhất</h2>
+      <p style="font-size: 0.825rem; color: var(--text-muted);">Biến động quy mô tài chính theo chu kỳ tháng</p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <span class="badge badge-mint">Thu nhập</span>
+      <span class="badge badge-coral">Chi tiêu</span>
+    </div>
+  </div>
+  <div style="height: 320px; position: relative;">
+    <canvas id="sixMonthsChart"></canvas>
+  </div>
+</div>
+
+<!-- Cơ cấu chi tiêu & Top danh mục -->
+<div class="dashboard-two-col-grid">
+  <!-- Cơ cấu chi tiêu Donut -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Phân Bổ Chi Tiêu Theo Danh Mục</h2>
+    </div>
+    <div style="height: 300px; position: relative; display: flex; align-items: center; justify-content: center;">
+      {% if expense_donut_data_json != "[]" %}
+      <canvas id="expenseReportsDonut"></canvas>
+      {% else %}
+      <div style="text-align: center; color: var(--text-muted);">
+        <p>Không có dữ liệu chi tiêu trong tháng này.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Top 5 danh mục chi tiêu cao nhất -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Top 5 Khoản Chi Lớn Nhất</h2>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% for cat in top_categories_list %}
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.35rem;">
+          <span>{{ forloop.counter }}. {{ cat.name }}</span>
+          <span class="tabular" style="color: var(--accent-coral);">{{ cat.amount|vnd }}₫ ({{ cat.percentage|floatformat:1 }}%)</span>
+        </div>
+        <div class="meter-track" style="height: 8px;">
+          <div class="meter-fill danger" style="width: {{ cat.percentage }}%;"></div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        Chưa có dữ liệu chi tiêu.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script id="sixMonthsLabelsData" type="application/json">{{ six_months_labels_json|safe }}</script>
+<script id="sixMonthsIncomeData" type="application/json">{{ six_months_income_json|safe }}</script>
+<script id="sixMonthsExpenseData" type="application/json">{{ six_months_expense_json|safe }}</script>
+<script id="expenseDonutLabelsData" type="application/json">{{ expense_donut_labels_json|safe }}</script>
+<script id="expenseDonutDataData" type="application/json">{{ expense_donut_data_json|safe }}</script>
+
+<script>
+  const parseJsonData = (id, fallback) => {
+    try {
+      const el = document.getElementById(id);
+      return el ? JSON.parse(el.textContent) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  };
+
+  // 1. Biểu đồ 6 tháng
+  const ctxSix = document.getElementById('sixMonthsChart');
+  if (ctxSix) {
+    new Chart(ctxSix, {
+      type: 'bar',
+      data: {
+        labels: parseJsonData('sixMonthsLabelsData', []),
+        datasets: [
+          {
+            label: 'Thu nhập',
+            data: parseJsonData('sixMonthsIncomeData', []),
+            backgroundColor: '#10b981',
+            borderRadius: 6
+          },
+          {
+            label: 'Chi tiêu',
+            data: parseJsonData('sixMonthsExpenseData', []),
+            backgroundColor: '#f43f5e',
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: ${window.formatVND ? window.formatVND(ctx.raw) : ctx.raw}₫`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            grid: { color: '#f1f5f9' },
+            ticks: {
+              callback: (v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : `${(v/1000).toFixed(0)}k`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Biểu đồ Donut Báo cáo
+  const ctxExpDonut = document.getElementById('expenseReportsDonut');
+  if (ctxExpDonut) {
+    new Chart(ctxExpDonut, {
+      type: 'doughnut',
+      data: {
+        labels: parseJsonData('expenseDonutLabelsData', []),
+        datasets: [{
+          data: parseJsonData('expenseDonutDataData', []),
+          backgroundColor: [
+            '#6366f1', '#f59e0b', '#ec4899', '#14b8a6', '#06b6d4',
+            '#8b5cf6', '#3b82f6', '#10b981', '#f43f5e'
+          ],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.label}: ${window.formatVND ? window.formatVND(ctx.raw) : ctx.raw}₫`
+            }
+          }
+        },
+        cutout: '65%'
+      }
+    });
+  }
+</script>
+{% endblock %}
+
