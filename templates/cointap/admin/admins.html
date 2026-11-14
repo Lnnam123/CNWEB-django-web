@@ -82,7 +82,12 @@
 
         <div class="form-group">
           <label class="form-label">Mật khẩu ban đầu *</label>
-          <input type="password" name="password" class="form-control" placeholder="••••••••" required minlength="6">
+          <div class="password-input-group" style="position: relative; display: flex; align-items: center; width: 100%;">
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required minlength="6" style="padding-right: 2.75rem !important;">
+            <button type="button" class="password-toggle-btn" aria-label="Hiện/ẩn mật khẩu" title="Hiện/ẩn mật khẩu" onclick="togglePasswordVisibility(this)" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #94a3b8; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; outline: none; z-index: 5;">
+              <span class="material-symbols-outlined" style="font-size: 1.25rem; line-height: 1; pointer-events: none;">visibility</span>
+            </button>
+          </div>
         </div>
 
         <div class="form-group">

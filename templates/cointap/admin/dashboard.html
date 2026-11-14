@@ -64,21 +64,21 @@
     </div>
   </div>
 
-  <!-- KPI 4: Phiên vấn đáp Gemini AI -->
+  <!-- KPI 4: Quản trị viên hệ thống -->
   <div class="card" style="border-left: 4px solid #8b5cf6;">
     <div style="display: flex; align-items: center; justify-content: space-between;">
       <div>
-        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">PHIÊN TRỢ LÝ AI</div>
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">QUẢN TRỊ VIÊN</div>
         <div class="tabular" style="font-size: 2rem; font-weight: 800; color: #8b5cf6; margin-top: 0.25rem;">
-          {{ total_ai_sessions_count }}
+          {{ total_admins_count }}
         </div>
       </div>
       <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: #f5f3ff; color: #8b5cf6; display: flex; align-items: center; justify-content: center;">
-        <span class="material-symbols-outlined" style="font-size: 1.5rem;">smart_toy</span>
+        <span class="material-symbols-outlined" style="font-size: 1.5rem;">admin_panel_settings</span>
       </div>
     </div>
     <div style="margin-top: 0.75rem;">
-      <a href="{% url 'admin_ai_logs' %}" style="font-size: 0.8rem; color: #8b5cf6; font-weight: 600; text-decoration: none;">Xem nhật ký vấn đáp →</a>
+      <a href="{% url 'admin_admins' %}" style="font-size: 0.8rem; color: #8b5cf6; font-weight: 600; text-decoration: none;">Xem danh sách quản trị →</a>
     </div>
   </div>
 </div>
@@ -122,8 +122,8 @@
         <strong style="color: #ffffff;">PostgreSQL 14+ / Linux</strong>
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span style="color: #94a3b8;">Trợ lý AI Engine:</span>
-        <strong style="color: #38bdf8;">Gemini 1.5 + Fallback</strong>
+        <span style="color: #94a3b8;">Phiên bản hệ thống:</span>
+        <strong style="color: #38bdf8;">CoinTap v3.5 (Core FinTech)</strong>
       </div>
     </div>
 

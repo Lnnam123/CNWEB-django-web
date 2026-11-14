@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import (
     views_auth,
     views_dashboard,
@@ -50,11 +51,10 @@ urlpatterns = [
     # 7. Báo cáo & Thống kê tài chính (Reports)
     path('reports/', views_reports.reports_view, name='reports'),
 
-    # 8. Trợ lý Cố vấn AI (CoinTap AI Assistant)
-    path('ai-assistant/', views_assistant.ai_assistant_view, name='ai_assistant'),
-    path('ai-assistant/new/', views_assistant.ai_new_session_view, name='ai_new_session'),
-    path('ai-assistant/<str:session_id>/delete/', views_assistant.ai_delete_session_view, name='ai_delete_session'),
-    path('api/ai-chat/', views_assistant.ai_chat_api, name='ai_chat_api'),
+    # 8. Trợ lý AI (Đã vô hiệu hóa - Tự động chuyển hướng về trang chủ)
+    path('ai-assistant/', RedirectView.as_view(url='/', permanent=False), name='ai_assistant'),
+    path('ai-assistant/new/', RedirectView.as_view(url='/', permanent=False), name='ai_new_session'),
+    path('ai-assistant/<str:session_id>/delete/', RedirectView.as_view(url='/', permanent=False), name='ai_delete_session'),
 
     # 9. Trung tâm Thông báo (Notifications)
     path('notifications/', views_notifications.notifications_list_view, name='notifications_list'),
@@ -70,7 +70,7 @@ urlpatterns = [
     path('admin-portal/admins/<int:admin_id>/delete/', views_admin.admin_admin_delete_view, name='admin_admin_delete'),
     path('admin-portal/categories/', views_admin.admin_categories_view, name='admin_categories'),
     path('admin-portal/categories/<int:category_id>/delete/', views_admin.admin_category_delete_view, name='admin_category_delete'),
-    path('admin-portal/ai-logs/', views_admin.admin_ai_logs_view, name='admin_ai_logs'),
+    path('admin-portal/ai-logs/', RedirectView.as_view(url='/admin-portal/', permanent=False), name='admin_ai_logs'),
     path('admin-portal/broadcast/', views_admin.admin_broadcast_view, name='admin_broadcast'),
 ]
 

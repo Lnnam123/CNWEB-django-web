@@ -18,7 +18,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- CoinTap Custom Design System -->
-  <link rel="stylesheet" href="/static/css/cointap.css?v=3.3">
+  <link rel="stylesheet" href="/static/css/cointap.css?v=3.6">
   <script>
     if (localStorage.getItem('cointap_sidebar_collapsed') === 'true' && window.innerWidth > 768) {
       document.documentElement.classList.add('sidebar-is-collapsed');
@@ -97,11 +97,6 @@
           <span>Danh mục mẫu</span>
         </a>
 
-        <a href="{% url 'admin_ai_logs' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_ai_logs' %}active{% endif %}" data-tooltip="Nhật ký Gemini AI">
-          <span class="material-symbols-outlined">smart_toy</span>
-          <span>Nhật ký Gemini AI</span>
-        </a>
-
         <a href="{% url 'admin_broadcast' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_broadcast' %}active{% endif %}" data-tooltip="Phát thông báo">
           <span class="material-symbols-outlined">campaign</span>
           <span>Phát thông báo</span>
@@ -163,7 +158,7 @@
     </div>
   </div>
 
-  <script src="/static/js/cointap.js?v=3.3"></script>
+  <script src="/static/js/cointap.js?v=3.6"></script>
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

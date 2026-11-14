@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}CoinTap - Quản Lý Chi Tiêu & Trợ Lý Tài Chính AI{% endblock %}</title>
+  <title>{% block title %}CoinTap - Quản Lý Chi Tiêu & Tài Chính Cá Nhân{% endblock %}</title>
 
   <!-- Google Fonts: Manrope (Đồng bộ chuẩn 100% với web_admin) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- CoinTap Custom Design System -->
-  <link rel="stylesheet" href="/static/css/cointap.css?v=3.3">
+  <link rel="stylesheet" href="/static/css/cointap.css?v=3.6">
   <script>
     if (localStorage.getItem('cointap_sidebar_collapsed') === 'true' && window.innerWidth > 768) {
       document.documentElement.classList.add('sidebar-is-collapsed');
@@ -96,14 +96,6 @@
         <a href="{% url 'reports' %}" class="nav-link {% if 'report' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Báo cáo">
           <span class="material-symbols-outlined">monitoring</span>
           <span>Báo cáo</span>
-        </a>
-
-        <div class="nav-section-title">Trí tuệ nhân tạo</div>
-
-        <a href="{% url 'ai_assistant' %}" class="nav-link {% if 'ai' in request.resolver_match.url_name %}active{% endif %}" data-tooltip="Trợ lý AI">
-          <span class="material-symbols-outlined" style="color: #818cf8;">psychology</span>
-          <span>Trợ lý AI</span>
-          <span class="badge badge-indigo" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">Gemini</span>
         </a>
 
         <div class="nav-section-title">Hệ thống</div>
@@ -307,7 +299,7 @@
   </div>
 
   <!-- Interactive JavaScript -->
-  <script src="/static/js/cointap.js?v=3.3"></script>
+  <script src="/static/js/cointap.js?v=3.6"></script>
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

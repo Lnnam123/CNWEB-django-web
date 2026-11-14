@@ -1279,6 +1279,54 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   box-shadow: 0 0 0 3px var(--brand-glow);
 }
 
+/* Password visibility toggle input group */
+.password-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-group .form-control {
+  padding-right: 2.75rem !important;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted, #94a3b8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm, 6px);
+  transition: all 0.15s ease;
+  z-index: 2;
+  user-select: none;
+  padding: 0;
+}
+
+.password-toggle-btn:hover {
+  color: var(--brand-primary, #6366f1);
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+.password-toggle-btn:focus-visible {
+  outline: 2px solid var(--brand-primary, #6366f1);
+  outline-offset: 1px;
+}
+
+.password-toggle-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
 /* Toast Messages */
 .toast-container {
   position: fixed;
@@ -1537,7 +1585,38 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   }
 }
 
-/* Responsive */
+/* ==============================================================================
+   TỐI ƯU TOÀN DIỆN CHO THIẾT BỊ DI ĐỘNG (MOBILE & TABLET RESPONSIVE SUITE)
+   ============================================================================== */
+
+/* Lớp phủ mờ (Backdrop) khi mở menu trên di động */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.sidebar-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+body.sidebar-open-mobile {
+  overflow: hidden;
+}
+
+@keyframes modalSheetIn {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tablet & Mobile Screens (<= 1024px) */
 @media (max-width: 1024px) {
   .financial-pulse-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1545,54 +1624,211 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   }
 }
 
+/* Mobile Screens (<= 768px) */
 @media (max-width: 768px) {
-  .app-sidebar {
-    transform: translateX(-100%);
-    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.4);
+  /* Khóa vùng cuộn ngoài ý muốn */
+  html, body {
+    overflow-x: hidden;
   }
+
+  /* 1. Sidebar dạng trượt từ mép trái mượt mà */
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px !important;
+    max-width: 82vw !important;
+    z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 4px 0 30px rgba(0, 0, 0, 0.45);
+  }
+
   .app-sidebar.open {
     transform: translateX(0);
   }
+
+  /* 2. Khung nội dung chính chiếm trọn 100% chiều rộng */
   .app-main {
     margin-left: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
   }
+
+  /* 3. Header thanh thoát, nút bấm vuông vắn 38x38px chuẩn Touch Target */
   .app-header {
-    padding: 0 1rem;
+    height: 56px;
+    padding: 0 0.85rem;
   }
-  .header-actions .btn span:not(.material-symbols-outlined) {
-    display: none;
-  }
+
   .live-clock-pill {
     display: none;
   }
-  .app-content {
-    padding: 1.25rem 1rem;
+
+  .header-actions {
+    gap: 0.45rem;
   }
+
+  .header-actions .btn {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 !important;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+  }
+
+  .header-actions .btn span:not(.material-symbols-outlined) {
+    display: none;
+  }
+
+  .header-actions .btn .material-symbols-outlined {
+    font-size: 1.25rem !important;
+    margin: 0 !important;
+  }
+
+  /* 4. Padding nội dung trang gọn gàng hơn */
+  .app-content {
+    padding: 1rem 0.85rem;
+  }
+
+  /* 5. Thẻ Card & Lưới chỉ số */
+  .card {
+    padding: 1.15rem 1rem;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+  }
+
   .financial-pulse-grid {
     grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  /* 6. Page Header (Tiêu đề trang & Các nút hành động) */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .page-header .page-actions {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .page-header .page-actions .btn {
+    flex: 1;
+    min-height: 42px;
+  }
+
+  /* 7. Nút bấm tối ưu cho ngón tay (Touch Target) */
+  .btn {
+    min-height: 40px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    padding: 0.45rem 0.85rem;
+  }
+
+  /* 8. Bảng dữ liệu trượt mượt trên cảm ứng */
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+  }
+
+  .data-table th, .data-table td {
+    padding: 0.75rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  /* 9. Popup / Modals chuyển sang kiểu Bottom-Sheet hiện đại */
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSheetIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal-header {
+    padding: 1.1rem 1.25rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
     gap: 1rem;
   }
-  .chat-container {
-    flex-direction: column;
-    height: auto;
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
+    flex-direction: column-reverse;
+    gap: 0.6rem;
   }
-  .chat-sessions-sidebar {
+
+  .modal-footer .btn {
     width: 100%;
-    max-height: 200px;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+
+  /* 10. Chống phóng to tự động trên iOS khi chạm ô nhập */
+  .form-control, input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* 11. Toast thông báo tràn vừa màn hình */
+  .toast-container {
+    top: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    max-width: none;
+  }
+
+  .toast {
+    width: 100%;
+  }
+
+  /* 12. Thẻ ví và Ngân sách */
+  .wallet-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
   }
 }
 
+/* Bộ lọc tìm kiếm trên máy tính bảng */
 @media (max-width: 900px) {
   .filter-form-grid {
     grid-template-columns: 1fr 1fr !important;
   }
 }
 
+/* Màn hình điện thoại nhỏ (<= 540px) */
 @media (max-width: 540px) {
   .filter-form-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .pulse-card .tabular {
+    font-size: 1.6rem !important;
+  }
+
+  .wallet-card {
+    padding: 1rem;
   }
 }
 

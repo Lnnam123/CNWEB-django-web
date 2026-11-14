@@ -34,7 +34,7 @@ def admin_dashboard_view(request):
     total_users_count = UserAccount.objects.count()
     total_wallets_count = Wallet.objects.count()
     total_transactions_count = Transaction.objects.count()
-    total_ai_sessions_count = AIConversation.objects.count()
+    total_admins_count = AdminAccount.objects.count()
 
     # Tổng tài sản lưu chuyển trên toàn hệ thống
     total_system_cash = Wallet.objects.aggregate(total=Sum('balance'))['total'] or Decimal('0.00')
@@ -56,7 +56,7 @@ def admin_dashboard_view(request):
         'total_users_count': total_users_count,
         'total_wallets_count': total_wallets_count,
         'total_transactions_count': total_transactions_count,
-        'total_ai_sessions_count': total_ai_sessions_count,
+        'total_admins_count': total_admins_count,
         'total_system_cash': total_system_cash,
         'total_system_income': total_system_income,
         'total_system_expense': total_system_expense,

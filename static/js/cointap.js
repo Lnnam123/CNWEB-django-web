@@ -67,16 +67,46 @@ document.addEventListener('DOMContentLoaded', () => {
       updateToggleIcons(false);
     }
 
+    // Tạo lớp phủ mờ (Backdrop) khi mở menu trên di động
+    let backdrop = document.querySelector('.sidebar-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.className = 'sidebar-backdrop';
+      document.body.appendChild(backdrop);
+    }
+
+    const closeMobileSidebar = () => {
+      if (sidebar && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('active');
+        document.body.classList.remove('sidebar-open-mobile');
+      }
+    };
+
+    backdrop.addEventListener('click', closeMobileSidebar);
+
     // Gán sự kiện click cho toàn bộ nút toggle (ở Topbar và ở Sidebar Header)
     toggleButtons.forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (window.innerWidth <= 768) {
-          sidebar.classList.toggle('open');
+          const willOpen = !sidebar.classList.contains('open');
+          sidebar.classList.toggle('open', willOpen);
+          backdrop.classList.toggle('active', willOpen);
+          document.body.classList.toggle('sidebar-open-mobile', willOpen);
         } else {
           const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
           applySidebarState(!isCurrentlyCollapsed);
+        }
+      });
+    });
+
+    // Tự động đóng sidebar mobile khi bấm vào link chuyển trang
+    sidebar.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          closeMobileSidebar();
         }
       });
     });
@@ -285,3 +315,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Hàm hỗ trợ ẩn/hiện mật khẩu (Show/Hide Password)
+window.togglePasswordVisibility = function(btn) {
+  if (!btn) return;
+  const container = btn.closest('.password-input-group') || btn.parentElement;
+  if (!container) return;
+  const input = container.querySelector('input');
+  const icon = btn.querySelector('.material-symbols-outlined') || btn.querySelector('span');
+  if (!input) return;
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) icon.textContent = 'visibility_off';
+    btn.setAttribute('aria-label', 'Ẩn mật khẩu');
+    btn.setAttribute('title', 'Ẩn mật khẩu');
+  } else {
+    input.type = 'password';
+    if (icon) icon.textContent = 'visibility';
+    btn.setAttribute('aria-label', 'Hiện mật khẩu');
+    btn.setAttribute('title', 'Hiện mật khẩu');
+  }
+};
