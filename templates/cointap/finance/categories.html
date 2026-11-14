@@ -3,12 +3,12 @@
 {% block title %}Quản Lý Danh Mục - CoinTap{% endblock %}
 
 {% block content %}
-<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+<div class="page-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 0.85rem;">
   <div>
     <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Danh Mục Thu - Chi</h1>
     <p style="color: var(--text-muted); font-size: 0.925rem;">Phân loại và gán nhãn cho các khoản tiền của bạn</p>
   </div>
-  <button onclick="openModal('createCategoryModal')" class="btn btn-primary">
+  <button onclick="openModal('createCategoryModal')" class="btn btn-primary" style="min-height: 40px;">
     <span class="material-symbols-outlined">add</span>
     <span>Thêm danh mục mới</span>
   </button>

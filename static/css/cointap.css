@@ -1709,22 +1709,38 @@ body.sidebar-open-mobile {
   }
 
   /* 6. Page Header (Tiêu đề trang & Các nút hành động) */
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
+  .page-header,
+  .app-content > div[style*="justify-content: space-between"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.85rem !important;
+    margin-bottom: 1.25rem !important;
   }
 
-  .page-header .page-actions {
-    width: 100%;
-    display: flex;
-    gap: 0.5rem;
+  .page-header .page-actions,
+  .page-header form,
+  .app-content > div[style*="justify-content: space-between"] > div:last-child,
+  .app-content > div[style*="justify-content: space-between"] form {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
   }
 
-  .page-header .page-actions .btn {
-    flex: 1;
-    min-height: 42px;
+  .page-header form input,
+  .app-content > div[style*="justify-content: space-between"] form input {
+    flex: 1 !important;
+    min-width: 140px !important;
+    min-height: 40px !important;
+  }
+
+  .page-header .btn,
+  .app-content > div[style*="justify-content: space-between"] .btn,
+  .app-content > div[style*="justify-content: space-between"] > button {
+    flex: 1 !important;
+    white-space: nowrap !important;
+    min-height: 42px !important;
+    justify-content: center !important;
   }
 
   /* 7. Nút bấm tối ưu cho ngón tay (Touch Target) */
