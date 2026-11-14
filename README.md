@@ -35,29 +35,10 @@ Giao diện được thiết kế theo chuẩn **Frontend-Design Skill** của A
 
 ---
 
-## 🗄️ Cơ Sở Dữ Liệu & Bản Sao Supabase
-
-Tệp SQL độc lập sẵn sàng chạy trên server Linux riêng:
-👉 **[`database/init_cointap_database.sql`](database/init_cointap_database.sql)**
-
-- Bao gồm cấu trúc 9 bảng, toàn bộ dữ liệu mẫu đã sao chép từ Supabase.
-- Tích hợp Trigger PostgreSQL `update_wallet_balance()` tự động cập nhật số dư ví khi thêm/sửa/xóa giao dịch.
-- Tự động đồng bộ lại các sequence `SERIAL`.
-
----
 
 ## 🔐 Tài Khoản Đăng Nhập Mẫu (Tự Động Nhận Diện Vai Trò Thông Minh)
 
 Trang đăng nhập duy nhất tại `http://127.0.0.1:8000/login/` tự động nhận diện danh tính và chuyển hướng đúng về phân hệ tương ứng:
-
-### 👤 Phân Hệ Người Dùng Cá Nhân (Trỏ về Dashboard `/`):
-- **Lê Nhật Nam:** `nhatnam28062006@gmail.com` | Mật khẩu: `Lnnam286@`
-- **quan:** `leq118157@gmail.com` | Mật khẩu: `123456`
-- **Tiểu Màn Thầu:** `ggwn021@gmail.com` | Mật khẩu: `thaoMinh11`
-
-### 🛡️ Phân Hệ Quản Trị Viên (Trỏ về Admin Portal `/admin-portal/`):
-- **Super Admin:** `admin` | Mật khẩu: `Lnnam123@`
-- **Administrator:** `nhatnam286` | Mật khẩu: `Lnnam123@`
 
 ---
 
