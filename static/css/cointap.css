@@ -7,53 +7,134 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 :root {
+  /* ==============================================================================
+     META ASTRYX DESIGN SYSTEM TOKENS (meta/astryx)
+     Hệ thống Design Tokens chuẩn hóa từ Astryx - Meta Open Source
+     ============================================================================== */
+  
+  /* 1. Astryx Color Palette & Semantic Tokens */
+  --astryx-color-canvas: #f8fafc;
+  --astryx-color-surface: #ffffff;
+  --astryx-color-surface-hover: #f1f5f9;
+  --astryx-color-surface-raised: #ffffff;
+  --astryx-color-surface-sunken: #f8fafc;
+  --astryx-color-surface-translucent: rgba(255, 255, 255, 0.88);
+
+  --astryx-color-border-subtle: rgba(15, 23, 42, 0.08);
+  --astryx-color-border-strong: rgba(15, 23, 42, 0.16);
+  --astryx-color-border-focus: #6366f1;
+
+  --astryx-color-text-primary: #0f172a;
+  --astryx-color-text-secondary: #475569;
+  --astryx-color-text-muted: #64748b;
+  --astryx-color-text-inverse: #ffffff;
+
+  --astryx-color-brand-primary: #6366f1;
+  --astryx-color-brand-primary-hover: #4f46e5;
+  --astryx-color-brand-primary-subtle: #eef2ff;
+  --astryx-color-brand-primary-text: #4338ca;
+
+  --astryx-color-data-income: #10b981;
+  --astryx-color-data-income-hover: #059669;
+  --astryx-color-data-income-bg: #ecfdf5;
+  --astryx-color-data-income-text: #065f46;
+
+  --astryx-color-data-expense: #f43f5e;
+  --astryx-color-data-expense-hover: #e11d48;
+  --astryx-color-data-expense-bg: #fff1f2;
+  --astryx-color-data-expense-text: #9f1239;
+
+  --astryx-color-data-warning: #f59e0b;
+  --astryx-color-data-warning-bg: #fffbeb;
+  --astryx-color-data-warning-text: #92400e;
+
+  --astryx-color-data-info: #0284c7;
+  --astryx-color-data-info-bg: #f0f9ff;
+  --astryx-color-data-info-text: #0369a1;
+
+  /* 2. Astryx Spacing Tokens */
+  --astryx-spacing-1: 0.25rem;  /* 4px */
+  --astryx-spacing-2: 0.5rem;   /* 8px */
+  --astryx-spacing-3: 0.75rem;  /* 12px */
+  --astryx-spacing-4: 1rem;     /* 16px */
+  --astryx-spacing-5: 1.25rem;  /* 20px */
+  --astryx-spacing-6: 1.5rem;   /* 24px */
+  --astryx-spacing-8: 2rem;     /* 32px */
+  --astryx-spacing-10: 2.5rem;  /* 40px */
+  --astryx-spacing-12: 3rem;    /* 48px */
+
+  /* 3. Astryx Border Radius Tokens */
+  --astryx-radius-xs: 4px;
+  --astryx-radius-sm: 8px;
+  --astryx-radius-md: 12px;
+  --astryx-radius-lg: 16px;
+  --astryx-radius-xl: 20px;
+  --astryx-radius-full: 9999px;
+
+  /* 4. Astryx Layered Elevation & Ambient Shadows */
+  --astryx-shadow-flat: none;
+  --astryx-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --astryx-shadow-raised: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --astryx-shadow-overlay: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --astryx-shadow-floating: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --astryx-shadow-sheet: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --astryx-shadow-glow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+
+  /* 5. Astryx Motion & Dynamics */
+  --astryx-duration-fast: 150ms;
+  --astryx-duration-normal: 220ms;
+  --astryx-duration-slow: 320ms;
+  --astryx-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --astryx-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* 6. Ánh xạ tương thích ngược cho CoinTap */
   --brand-dark: #0b132b;
   --brand-navy: #1c2541;
-  --brand-primary: #6366f1;
-  --brand-primary-hover: #4f46e5;
-  --brand-light: #eef2ff;
-  --brand-glow: rgba(99, 102, 241, 0.15);
+  --brand-primary: var(--astryx-color-brand-primary);
+  --brand-primary-hover: var(--astryx-color-brand-primary-hover);
+  --brand-light: var(--astryx-color-brand-primary-subtle);
+  --brand-glow: var(--astryx-shadow-glow);
 
-  --accent-mint: #10b981;
-  --accent-mint-hover: #059669;
-  --accent-mint-bg: #ecfdf5;
-  --accent-mint-text: #065f46;
+  --accent-mint: var(--astryx-color-data-income);
+  --accent-mint-hover: var(--astryx-color-data-income-hover);
+  --accent-mint-bg: var(--astryx-color-data-income-bg);
+  --accent-mint-text: var(--astryx-color-data-income-text);
 
-  --accent-coral: #f43f5e;
-  --accent-coral-hover: #e11d48;
-  --accent-coral-bg: #fff1f2;
-  --accent-coral-text: #9f1239;
+  --accent-coral: var(--astryx-color-data-expense);
+  --accent-coral-hover: var(--astryx-color-data-expense-hover);
+  --accent-coral-bg: var(--astryx-color-data-expense-bg);
+  --accent-coral-text: var(--astryx-color-data-expense-text);
 
-  --accent-amber: #f59e0b;
-  --accent-amber-bg: #fffbeb;
-  --accent-amber-text: #92400e;
+  --accent-amber: var(--astryx-color-data-warning);
+  --accent-amber-bg: var(--astryx-color-data-warning-bg);
+  --accent-amber-text: var(--astryx-color-data-warning-text);
 
-  --accent-blue: #0284c7;
-  --accent-blue-bg: #f0f9ff;
+  --accent-blue: var(--astryx-color-data-info);
+  --accent-blue-bg: var(--astryx-color-data-info-bg);
 
-  --bg-canvas: #f8fafc;
-  --surface-card: #ffffff;
-  --surface-hover: #f1f5f9;
-  --border-subtle: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --bg-canvas: var(--astryx-color-canvas);
+  --surface-card: var(--astryx-color-surface);
+  --surface-hover: var(--astryx-color-surface-hover);
+  --border-subtle: var(--astryx-color-border-subtle);
+  --border-strong: var(--astryx-color-border-strong);
 
-  --text-main: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-inverse: #ffffff;
+  --text-main: var(--astryx-color-text-primary);
+  --text-secondary: var(--astryx-color-text-secondary);
+  --text-muted: var(--astryx-color-text-muted);
+  --text-inverse: var(--astryx-color-text-inverse);
 
   --font-main: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'Manrope', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.25);
+  --shadow-sm: var(--astryx-shadow-sm);
+  --shadow-md: var(--astryx-shadow-raised);
+  --shadow-lg: var(--astryx-shadow-overlay);
+  --shadow-glow: var(--astryx-shadow-glow);
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
+  --radius-sm: var(--astryx-radius-sm);
+  --radius-md: var(--astryx-radius-md);
+  --radius-lg: var(--astryx-radius-lg);
+  --radius-full: var(--astryx-radius-full);
 
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 76px;
@@ -65,6 +146,7 @@ html {
   box-sizing: border-box;
   overflow-x: hidden;
   max-width: 100vw;
+  scrollbar-gutter: stable;
 }
 
 *, *::before, *::after {
@@ -668,11 +750,13 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   transform: scale(1.06) !important;
 }
 
-/* Topbar */
+/* Topbar (Astryx Translucent Header) */
 .app-header {
   height: var(--header-height);
-  background-color: var(--surface-card);
-  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--astryx-color-surface-translucent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--astryx-color-border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -680,6 +764,7 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   position: sticky;
   top: 0;
   z-index: 90;
+  transition: background-color var(--astryx-duration-normal) ease, border-color var(--astryx-duration-normal) ease;
 }
 
 .header-left {
@@ -707,65 +792,108 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   gap: 1rem;
 }
 
-/* Nút bấm (Buttons) */
+/* Nút bấm chuẩn Astryx (Buttons & Interactive Controls) */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--astryx-spacing-2);
   padding: 0.55rem 1.15rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.15s ease;
   line-height: 1.25;
+  transition: transform var(--astryx-duration-fast) var(--astryx-ease-spring),
+              background-color var(--astryx-duration-fast) ease,
+              box-shadow var(--astryx-duration-fast) ease,
+              border-color var(--astryx-duration-fast) ease;
+  user-select: none;
+  touch-action: manipulation;
+  letter-spacing: -0.01em;
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transform: scale(0.97);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--astryx-color-brand-primary);
+  outline-offset: 2px;
 }
 
 .btn-primary {
-  background-color: var(--brand-primary);
+  background: linear-gradient(135deg, var(--astryx-color-brand-primary) 0%, var(--astryx-color-brand-primary-hover) 100%);
   color: #ffffff;
-  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.28);
 }
 
 .btn-primary:hover {
-  background-color: var(--brand-primary-hover);
-  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.38);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.2);
 }
 
 .btn-success {
-  background-color: var(--accent-mint);
+  background: linear-gradient(135deg, var(--astryx-color-data-income) 0%, var(--astryx-color-data-income-hover) 100%);
   color: #ffffff;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
 }
 
 .btn-success:hover {
-  background-color: var(--accent-mint-hover);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
-  background-color: var(--accent-coral);
+  background: linear-gradient(135deg, var(--astryx-color-data-expense) 0%, var(--astryx-color-data-expense-hover) 100%);
   color: #ffffff;
+  box-shadow: 0 2px 6px rgba(244, 63, 94, 0.25);
 }
 
 .btn-danger:hover {
-  background-color: var(--accent-coral-hover);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-outline {
-  background-color: var(--surface-card);
-  border-color: var(--border-subtle);
-  color: var(--text-main);
+  background-color: var(--astryx-color-surface);
+  border: 1px solid var(--astryx-color-border-subtle);
+  color: var(--astryx-color-text-primary);
+  box-shadow: var(--astryx-shadow-sm);
 }
 
 .btn-outline:hover {
-  background-color: var(--surface-hover);
-  border-color: var(--border-strong);
+  background-color: var(--astryx-color-surface-hover);
+  border-color: var(--astryx-color-border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--astryx-shadow-raised);
+}
+
+.btn-outline:active {
+  transform: scale(0.97);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.825rem;
+  border-radius: 8px;
+}
+
+.btn-icon {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
 }
 
 .btn-ghost {
@@ -799,19 +927,23 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   margin: 0 auto;
 }
 
-/* Thẻ bề mặt (Cards) */
+/* Thẻ bề mặt (Astryx Surface Cards) */
 .card {
-  background-color: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  background-color: var(--astryx-color-surface);
+  border: 1px solid var(--astryx-color-border-subtle);
+  border-radius: var(--astryx-radius-lg);
   padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: var(--astryx-shadow-raised);
+  transition: transform var(--astryx-duration-normal) var(--astryx-ease-spring),
+              box-shadow var(--astryx-duration-normal) var(--astryx-ease-standard),
+              border-color var(--astryx-duration-normal) ease;
+  position: relative;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: #cbd5e1;
+  box-shadow: var(--astryx-shadow-floating);
+  border-color: var(--astryx-color-border-strong);
+  transform: translateY(-2px);
 }
 
 .card-header {
@@ -819,13 +951,17 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.25rem;
+  gap: 1rem;
 }
 
 .card-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-main);
-  letter-spacing: -0.01em;
+  color: var(--astryx-color-text-primary);
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* Hero Section: Financial Pulse */
@@ -863,7 +999,9 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
 .pulse-card-hero {
   background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
   color: #ffffff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--astryx-radius-lg);
+  box-shadow: 0 10px 25px -5px rgba(11, 19, 43, 0.35);
   position: relative;
   overflow: hidden;
 }
@@ -880,16 +1018,19 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
 }
 
 .pulse-label {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.825rem;
+  font-weight: 600;
   color: #94a3b8;
   margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .pulse-val {
   font-size: 2rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
   margin-bottom: 0.5rem;
 }
 
@@ -900,42 +1041,51 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   gap: 0.35rem;
 }
 
+/* Astryx Semantic Badges */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.25rem 0.65rem;
-  font-size: 0.775rem;
-  font-weight: 600;
-  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: var(--astryx-radius-full);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  border: 1px solid transparent;
 }
 
 .badge-mint {
-  background-color: var(--accent-mint-bg);
-  color: var(--accent-mint-text);
+  background-color: var(--astryx-color-data-income-bg);
+  color: var(--astryx-color-data-income-text);
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 .badge-coral {
-  background-color: var(--accent-coral-bg);
-  color: var(--accent-coral-text);
+  background-color: var(--astryx-color-data-expense-bg);
+  color: var(--astryx-color-data-expense-text);
+  border-color: rgba(244, 63, 94, 0.2);
 }
 
 .badge-amber {
-  background-color: var(--accent-amber-bg);
-  color: var(--accent-amber-text);
+  background-color: var(--astryx-color-data-warning-bg);
+  color: var(--astryx-color-data-warning-text);
+  border-color: rgba(245, 158, 11, 0.2);
 }
 
 .badge-indigo {
-  background-color: var(--brand-light);
-  color: var(--brand-primary);
+  background-color: var(--astryx-color-brand-primary-subtle);
+  color: var(--astryx-color-brand-primary-text);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .badge-neutral {
   background-color: #f1f5f9;
-  color: #475569;
+  color: var(--astryx-color-text-secondary);
+  border-color: var(--astryx-color-border-subtle);
 }
 
-/* Thanh đo Ngân sách (Budget Burn Progress) */
+/* Thanh đo Ngân sách (Budget Progress) */
 .budget-meter {
   display: flex;
   flex-direction: column;
@@ -946,55 +1096,60 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
   width: 100%;
   height: 8px;
   background-color: #f1f5f9;
-  border-radius: var(--radius-full);
+  border-radius: var(--astryx-radius-full);
   overflow: hidden;
 }
 
 .meter-fill {
   height: 100%;
-  border-radius: var(--radius-full);
-  transition: width 0.4s ease;
+  border-radius: var(--astryx-radius-full);
+  transition: width 0.4s var(--astryx-ease-standard);
 }
 
-.meter-fill.success { background-color: var(--accent-mint); }
-.meter-fill.warning { background-color: var(--accent-amber); }
-.meter-fill.danger { background-color: var(--accent-coral); }
+.meter-fill.success { background-color: var(--astryx-color-data-income); }
+.meter-fill.warning { background-color: var(--astryx-color-data-warning); }
+.meter-fill.danger { background-color: var(--astryx-color-data-expense); }
 
-/* Bảng dữ liệu (Data Table) */
+/* Bảng dữ liệu chuẩn Astryx (Edge-to-Edge Data Table) */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .data-table th {
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   background-color: #f8fafc;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.8rem;
-  border-bottom: 1px solid var(--border-subtle);
-  text-transform: none;
+  color: var(--astryx-color-text-muted);
+  font-weight: 700;
+  font-size: 0.725rem;
+  border-bottom: 1px solid var(--astryx-color-border-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .data-table td {
-  padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--astryx-color-border-subtle);
   vertical-align: middle;
+  color: var(--astryx-color-text-primary);
+  font-size: 0.875rem;
 }
 
 .data-table tbody tr {
-  transition: background-color 0.1s ease;
+  transition: background-color var(--astryx-duration-fast) ease;
 }
 
 .data-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: rgba(248, 250, 252, 0.85);
 }
 
 /* Thẻ ví tiền (Wallet Card) */
@@ -1210,23 +1365,24 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
 }
 
 .modal-box {
-  background-color: var(--surface-card);
-  border-radius: var(--radius-md);
+  background-color: var(--astryx-color-surface);
+  border-radius: var(--astryx-radius-xl);
+  border: 1px solid var(--astryx-color-border-subtle);
   width: 100%;
   max-width: 520px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--astryx-shadow-sheet);
   overflow: hidden;
-  animation: modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalIn 0.22s var(--astryx-ease-standard);
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modal-header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--astryx-color-border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1241,8 +1397,8 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
 
 .modal-footer {
   padding: 1rem 1.5rem;
-  background-color: #f8fafc;
-  border-top: 1px solid var(--border-subtle);
+  background-color: var(--astryx-color-surface-sunken);
+  border-top: 1px solid var(--astryx-color-border-subtle);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1257,26 +1413,27 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
 }
 
 .form-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--astryx-color-text-secondary);
+  letter-spacing: -0.01em;
 }
 
 .form-control {
   width: 100%;
-  padding: 0.65rem 0.85rem;
+  padding: 0.65rem 0.95rem;
   font-size: 0.9rem;
   font-family: inherit;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--astryx-color-border-subtle);
+  border-radius: 10px;
   background-color: #ffffff;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--astryx-duration-fast) ease, box-shadow var(--astryx-duration-fast) ease;
 }
 
 .form-control:focus {
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px var(--brand-glow);
+  border-color: var(--astryx-color-brand-primary);
+  box-shadow: var(--astryx-shadow-glow);
 }
 
 /* Password visibility toggle input group */
@@ -1365,26 +1522,20 @@ html.sidebar-is-collapsed .app-sidebar .sidebar-logout-btn:hover {
 /* ANIMATION SUITE - ANTHROPIC FRONTEND-DESIGN POLISH                        */
 /* ========================================================================= */
 
-/* 1. Staggered Page Entrance Animation */
+/* 1. Page Entrance - Triệt tiêu dịch chuyển layout (Zero Cumulative Layout Shift on F5) */
 @keyframes fadeInUp {
   0% {
     opacity: 0;
-    transform: translateY(18px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
+/* Đảm bảo toàn bộ nội dung hiển thị ổn định, không bị nhích/nhảy vị trí khi F5 reload */
 .app-content > * {
-  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: none;
 }
-
-.financial-pulse-grid > div:nth-child(1) { animation-delay: 0.04s; }
-.financial-pulse-grid > div:nth-child(2) { animation-delay: 0.08s; }
-.financial-pulse-grid > div:nth-child(3) { animation-delay: 0.12s; }
-.financial-pulse-grid > div:nth-child(4) { animation-delay: 0.16s; }
 
 /* 2. Enhanced Card Interactions & 3D Lift */
 .card {
