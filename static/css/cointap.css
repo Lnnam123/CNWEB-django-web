@@ -606,11 +606,13 @@ html.sidebar-is-collapsed .app-main {
 html.sidebar-is-collapsed .app-sidebar .sidebar-header {
   padding: 0 !important;
   justify-content: center !important;
+  align-items: center !important;
 }
 
 .app-sidebar.collapsed .brand-badge,
 html.sidebar-is-collapsed .app-sidebar .brand-badge {
   justify-content: center !important;
+  align-items: center !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -619,24 +621,10 @@ html.sidebar-is-collapsed .app-sidebar .brand-badge {
 }
 
 .app-sidebar.collapsed .brand-text,
-html.sidebar-is-collapsed .app-sidebar .brand-text {
-  opacity: 0 !important;
-  max-width: 0 !important;
-  transform: translateX(-12px) !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-}
-
+html.sidebar-is-collapsed .app-sidebar .brand-text,
 .app-sidebar.collapsed .btn-sidebar-toggle,
 html.sidebar-is-collapsed .app-sidebar .btn-sidebar-toggle {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: scale(0.6) !important;
-  max-width: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
+  display: none !important;
 }
 
 .app-sidebar.collapsed .brand-logo-wrap,
@@ -644,6 +632,9 @@ html.sidebar-is-collapsed .app-sidebar .brand-logo-wrap {
   width: 42px !important;
   height: 42px !important;
   margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .app-sidebar.collapsed .brand-logo-img,
@@ -652,9 +643,10 @@ html.sidebar-is-collapsed .app-sidebar .brand-logo-img {
   height: 38px !important;
   max-width: 38px !important;
   max-height: 38px !important;
+  margin: 0 !important;
 }
 
-/* Nav items khi thu gọn: loại bỏ hoàn toàn thanh cuộn ngang (overflow-x: hidden) */
+/* Nav items khi thu gọn: căn giữa tuyệt đối 100%, loại bỏ thanh cuộn ngang */
 .app-sidebar.collapsed .sidebar-nav,
 html.sidebar-is-collapsed .app-sidebar .sidebar-nav {
   padding: 1rem 0 !important;
@@ -683,7 +675,10 @@ html.sidebar-is-collapsed .app-sidebar .nav-link {
   height: 46px !important;
   margin: 0.35rem auto !important;
   padding: 0 !important;
+  display: flex !important;
   justify-content: center !important;
+  align-items: center !important;
+  gap: 0 !important;
   border-radius: 12px !important;
   position: relative !important;
   flex-shrink: 0 !important;
@@ -692,32 +687,27 @@ html.sidebar-is-collapsed .app-sidebar .nav-link {
 
 .app-sidebar.collapsed .nav-link span:not(.material-symbols-outlined),
 html.sidebar-is-collapsed .app-sidebar .nav-link span:not(.material-symbols-outlined) {
-  opacity: 0 !important;
-  max-width: 0 !important;
-  transform: translateX(-12px) !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  white-space: nowrap !important;
+  display: none !important;
 }
 
 .app-sidebar.collapsed .nav-link .nav-badge,
 html.sidebar-is-collapsed .app-sidebar .nav-link .nav-badge,
 .app-sidebar.collapsed .nav-link .badge,
 html.sidebar-is-collapsed .app-sidebar .nav-link .badge {
-  opacity: 0 !important;
-  max-width: 0 !important;
-  transform: scale(0.4) !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  display: none !important;
 }
 
 .app-sidebar.collapsed .nav-link .material-symbols-outlined,
 html.sidebar-is-collapsed .app-sidebar .nav-link .material-symbols-outlined {
   font-size: 1.45rem !important;
   margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  text-align: center !important;
 }
 
 .app-sidebar.collapsed .nav-link.active,
@@ -786,12 +776,7 @@ html.sidebar-is-collapsed .app-sidebar .user-profile-pill {
 
 .app-sidebar.collapsed .user-info-text,
 html.sidebar-is-collapsed .app-sidebar .user-info-text {
-  opacity: 0 !important;
-  max-width: 0 !important;
-  transform: translateX(-12px) !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  margin: 0 !important;
+  display: none !important;
 }
 
 .app-sidebar.collapsed .avatar,
