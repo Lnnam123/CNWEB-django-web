@@ -53,10 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
       updateToggleIcons(collapsed);
       localStorage.setItem('cointap_sidebar_collapsed', collapsed ? 'true' : 'false');
       
-      // Kích hoạt redraw Chart.js sau khi transition co/dãn sidebar hoàn tất (260ms)
+      // Kích hoạt redraw Chart.js sau khi transition co/dãn sidebar hoàn tất (290ms)
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
-      }, 260);
+      }, 290);
     };
 
     // Khởi tạo trạng thái đã lưu từ localStorage
